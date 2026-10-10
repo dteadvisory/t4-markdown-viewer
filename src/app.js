@@ -75,7 +75,6 @@ const els = {
   copyIcon: document.getElementById("copy-section-icon"),
   diagramDialog: document.getElementById("diagram-dialog"),
   diagramView: document.getElementById("diagram-view"),
-  diagramTools: document.getElementById("diagram-tools"),
   diagramLevel: document.getElementById("diagram-level"),
 };
 
@@ -134,6 +133,7 @@ const state = {
 const MD_EXTS = ["md", "markdown", "mdown", "mkd", "mdtext", "mdtxt", "mdwn", "mkdn"];
 const JSON_EXTS = ["json", "jsonc"];
 const DOC_LINK = new RegExp(`\\.(${[...MD_EXTS, ...JSON_EXTS].join("|")})$`, "i");
+const JSON_DOC = new RegExp(`\\.(${JSON_EXTS.join("|")})$`, "i");
 const IMG_LINK = /\.(svg|png|jpe?g|gif|webp|avif|bmp|ico)$/i;
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
@@ -403,16 +403,92 @@ function wrapTables(root) {
 function highlight(root) {
   root.querySelectorAll("pre > code").forEach((code) => {
     const declared = [...code.classList].some((c) => c.startsWith("language-"));
+    const shell = [...code.classList].some((c) => SHELL_CODE.test(c));
     if (declared) {
       try {
         hljs.highlightElement(code);
+        if (shell) splitLines(code);
         return;
       } catch {
         /* unknown language: fall through to plain styling */
       }
     }
     code.classList.add("hljs");
+    if (shell) splitLines(code);
   });
+}
+
+/** Commands, which wrap rather than scroll (base.css); program code keeps its lines. */
+const SHELL_CODE =
+  /^language-(sh|bash|shell|zsh|fish|console|shellsession|powershell|ps1|pwsh|cmd|bat|batch)$/i;
+
+/**
+ * Each line of a command in a block of its own, so one that wraps hangs under
+ * its start (`.line` in base.css). A highlight span that crosses a line break
+ * — a heredoc, a quoted string — is split there and reopened on the next line.
+ * Every line keeps its "\n", so the text, a copy and find see the same lines.
+ */
+function splitLines(code) {
+  const lines = [];
+  let line;
+  let open = []; // the spans open where the line breaks, outermost first
+  const newLine = () => {
+    line = document.createElement("span");
+    line.className = "line";
+    lines.push(line);
+    let parent = line;
+    open = open.map((el) => {
+      const copy = el.cloneNode(false);
+      parent.append(copy);
+      parent = copy;
+      return copy;
+    });
+  };
+  const visit = (node) => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      node.data.split("\n").forEach((part, i) => {
+        if (i) {
+          line.append("\n");
+          newLine();
+        }
+        if (part) (open.at(-1) ?? line).append(...holdHyphens(part));
+      });
+      return;
+    }
+    const copy = node.cloneNode(false);
+    (open.at(-1) ?? line).append(copy);
+    open.push(copy);
+    [...node.childNodes].forEach(visit);
+    open.pop();
+  };
+  newLine();
+  [...code.childNodes].forEach(visit);
+  if (lines.length > 1 && !line.textContent) lines.pop(); // the block's closing "\n"
+  code.replaceChildren(...lines);
+  code.parentElement.classList.add("command");
+}
+
+/** A hyphen with the characters either side of it: `--m` of `--make`, `4-m` of `t4-markdown`. */
+const HYPHEN_RUN = /[^\s-]?-+[^\s-]?/g;
+
+/**
+ * `text` with each hyphen run held to its neighbours (`.nobr` in base.css), so a
+ * wrapped command never breaks after a hyphen. Only those few characters are
+ * held: a long path still breaks elsewhere when it must.
+ */
+function holdHyphens(text) {
+  const out = [];
+  let last = 0;
+  for (const m of text.matchAll(HYPHEN_RUN)) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const span = document.createElement("span");
+    span.className = "nobr";
+    span.textContent = m[0];
+    out.push(span);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
 }
 
 /* ---------------- diagrams ---------------- */
@@ -980,6 +1056,14 @@ function warmSources(sources, stale) {
         // or a `call` — should not look like one.
         if (diagramType === "gantt")
           for (const el of root.querySelectorAll(".clickable")) if (!el.closest("a")) el.classList.remove("clickable");
+        // Its own width, not mermaid's "100%": the page sizes a diagram's box
+        // to the drawing (base.css, wide content), and a percentage there is
+        // circular. Still held to its box, and so the pane, by max-width.
+        const natural = parseFloat(root.style.maxWidth);
+        if (natural) {
+          root.setAttribute("width", natural);
+          root.style.maxWidth = "100%";
+        }
         // The root alone: the check above read only its styles, so a `<style>`
         // or anything else sent beside the drawing must never reach the page.
         done = { svg: root.outerHTML };
@@ -1274,6 +1358,7 @@ function openDiagram(fig) {
     back: fig.matches(":focus-visible") ? markOpenable(fig) : null,
   };
   els.diagramDialog.showModal();
+  document.documentElement.classList.add("diagram-open");
   zoomDiagram(1);
   els.diagramView.scrollTo(0, 0);
   els.diagramView.focus();
@@ -1304,6 +1389,7 @@ function onDiagramClose() {
   // The event comes a task after `close()`: an overlay opened again in between
   // is a new one, and emptying it would leave a blank modal.
   if (els.diagramDialog.open) return;
+  document.documentElement.classList.remove("diagram-open");
   const back = zoomed?.back;
   const path = zoomed?.path;
   zoomed = null;
@@ -1454,6 +1540,8 @@ function renderDocument(doc, scrollY, hash) {
   els.content.innerHTML = doc.html;
   els.content.dataset.path = doc.path;
   els.content.dataset.stamp = doc.stamp ?? "";
+  // The JSON view keeps the whole pane: see `.markdown-body.json`.
+  els.content.classList.toggle("json", JSON_DOC.test(doc.path));
   // comrak marks every task box disabled; here they are live, because a click
   // goes back to the file — unless the file cannot be written back. A file
   // decode had to repair is not valid UTF-8, so its boxes stay as comrak left
@@ -1462,6 +1550,13 @@ function renderDocument(doc, scrollY, hash) {
     for (const box of els.content.querySelectorAll('li > input[type="checkbox"]'))
       box.disabled = false;
   resolveMedia(els.content, doc.dir, doc.repo);
+  // A picture alone in its paragraph, or alone in a link alone in it, is a
+  // block, which may step out of the reading column (base.css); one in a line
+  // of text stays in it.
+  const alone = (el) => el.parentElement.childNodes.length === 1;
+  for (const img of els.content.querySelectorAll("p > img, p > a > img"))
+    if (alone(img) && (img.parentElement.tagName === "P" || alone(img.parentElement)))
+      img.classList.add("block");
   wrapTables(els.content);
   renderDiagrams(els.content);
   highlight(els.content);
@@ -5137,7 +5232,8 @@ async function main() {
   });
   // A drag that ends on a diagram's link must not follow it; the page behind is where links are followed.
   els.diagramView.addEventListener("click", (e) => e.target.closest("a") && e.preventDefault());
-  els.diagramTools.addEventListener("click", onDiagramToolsClick);
+  // The dialog, not the toolbar: the close button sits apart, in the corner.
+  els.diagramDialog.addEventListener("click", onDiagramToolsClick);
   els.diagramDialog.addEventListener("keydown", onDiagramKeydown);
   els.diagramDialog.addEventListener("close", onDiagramClose);
   window.addEventListener("resize", onResize);

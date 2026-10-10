@@ -419,6 +419,8 @@ body {
 main {
   flex: 1;
   min-width: 0;
+  /* `cqw` in the document is the pane's width, for content wider than the reading column. */
+  container-type: inline-size;
 }
 
 /*
@@ -1273,7 +1275,7 @@ html.image-mode {
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  padding: 0.25rem;
+  padding: 0.25rem 0.5rem;
   border: 1px solid var(--ui-border);
   border-radius: 4px;
   background: var(--ui-bg);
@@ -1311,9 +1313,64 @@ html.image-mode {
   outline-offset: 1px;
 }
 
+/* Where a window's close button is, and big enough to find without looking for it. */
+#diagram-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  color: var(--ui-fg);
+  background: var(--ui-bg);
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Drawn, not the × character, whose glyph sits off-centre in most fonts. */
+#diagram-close svg {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+#diagram-close:hover {
+  border-color: var(--ui-accent);
+}
+
+#diagram-close:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
+}
+
+/* The document stops scrolling under an open diagram, so its scrollbar doesn't
+   read as the diagram's; the gutter is held, so the text behind doesn't reflow.
+   app.js sets the class, like `image-mode`. */
+html.diagram-open {
+  overflow: hidden;
+  scrollbar-gutter: stable;
+}
+
+/* "Fit" stands apart from the −, level and + it isn't one of. */
+#image-tools [data-zoom="fit"],
+#diagram-tools [data-zoom="fit"] {
+  margin-left: 0.5rem;
+}
+
+/* Wide enough for "3200%" (ZOOM_MAX) and no more, and without the toolbar's
+   gaps either side, so − and + hug the level they change. */
 #zoom-level,
 #diagram-level {
-  min-width: 3.25rem;
+  min-width: 2.5rem;
+  margin-inline: -0.25rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
@@ -1385,7 +1442,34 @@ html.image-mode {
   font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Helvetica,
     Ubuntu, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   font-size: 0.875rem;
-  line-height: 1.6;
+  line-height: 1.7;
+  /* A length; a theme may set its own, and one wider than any window (100vw) turns the limit off. */
+  --measure: 75ch;
+  /* The reading column, centred in the pane: the sides take what the measure leaves. */
+  padding-inline: max(var(--content-pad), calc((100% - var(--measure)) / 2));
+  /* The page never scrolls sideways: wide content nested in a list can pass the pane by a few
+     px, which is cut; `clip`, unlike `hidden`, makes no scroll container. */
+  overflow-x: clip;
+}
+
+/*
+ * Wide content steps out of the column: as wide as it needs, up to the pane
+ * less its padding, centred on the column's middle. Diagrams and tables are at
+ * least the column's width; pictures as narrow as they are. Code stays in the
+ * column.
+ */
+.markdown-body .table-scroll,
+.markdown-body div.mermaid-diagram,
+.markdown-body img.block {
+  width: max-content;
+  max-width: calc(100cqw - 2 * var(--content-pad));
+  margin-left: 50%;
+  translate: -50%;
+}
+
+.markdown-body img.block {
+  display: block;
+  height: auto;
 }
 
 .markdown-body > *:first-child {
@@ -1542,7 +1626,7 @@ html.image-mode {
   height: auto;
 }
 
-/* Held to the column width here, but there is a full-size view a click away. */
+/* Shrunk to fit here, but there is a full-size view a click away. */
 .markdown-body img[data-file] {
   cursor: zoom-in;
 }
@@ -1554,21 +1638,52 @@ html.image-mode {
   outline-offset: 2px;
 }
 
-/* Wide content scrolls inside its own box; the page never scrolls sideways. */
+/* Code stays in the column; a long line scrolls inside its own box (a command wraps, below). */
 .markdown-body pre {
   overflow-x: auto;
-  margin: 0 0 1em;
+  margin-block: 0 1em;
   padding: 1em;
   border-radius: 4px;
   line-height: 1.5;
 }
 
-/* A diagram is held to the column by mermaid's own max-width; one wider still scrolls in its own box. */
+/*
+ * A command (app.js marks it, by language) reads fine wrapped, each line
+ * hanging under its start; program code would lose its indentation's shape,
+ * so it scrolls.
+ */
+.markdown-body pre.command {
+  white-space: pre-wrap;
+}
+
+/* A flag or a name isn't split at its hyphens (app.js wraps each hyphen with its neighbours). */
+.markdown-body pre.command .nobr {
+  white-space: nowrap;
+}
+
+.markdown-body pre.command .line {
+  display: block;
+  padding-left: 2em;
+  text-indent: -2em;
+}
+
+/* A JSON document is one huge `pre`, read as data rather than prose: it keeps the whole pane. */
+.markdown-body.json {
+  padding-inline: var(--content-pad);
+}
+
+/*
+ * A diagram is drawn at its own px width (app.js, warmSources) and shrinks to
+ * fit the pane; its box is at least the column's width, so a narrow one is
+ * centred in the column. A drawing with a fixed width of its own instead
+ * scrolls in its box.
+ */
 .markdown-body div.mermaid-diagram {
   overflow-x: auto;
-  margin: 0 0 1em;
+  margin-block: 0 1em;
   text-align: center;
   cursor: zoom-in;
+  min-width: 100%;
 }
 
 /* A sequence diagram's link menu entries would otherwise read as actor names. */
@@ -1647,9 +1762,10 @@ html.image-mode {
   cursor: default;
 }
 
+/* At least the column's width, so a narrow table sits at its left edge; a wider one is centred. */
 .markdown-body .table-scroll {
   overflow-x: auto;
-  max-width: 100%;
+  min-width: 100%;
 }
 
 .markdown-body table {

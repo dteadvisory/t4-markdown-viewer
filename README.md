@@ -47,6 +47,9 @@ Electron build starts around 150 MB.
   [Libron](https://github.com/nicoverbruggen/libron), a book font built into the
   app, in every theme. **Settings → Document font** takes another font installed
   on your computer, or clears to each theme's own.
+- **Reads like a page.** Text sits in a centred column about 75 characters wide;
+  tables, diagrams and pictures spread wider when they need to, and long shell
+  commands wrap.
 - **Live reload.** Edit in another editor; the view updates on save and keeps
   your scroll position.
 - **Tick task lists.** Click a checkbox and the `[ ]` in the file flips with it.
@@ -54,8 +57,8 @@ Electron build starts around 150 MB.
   tab of its own, with zoom and pan — a wide ERD is unreadable at column width.
   Clicking a picture embedded in a document opens the same view. A Mermaid
   diagram opens full window over the document, with the same zoom and pan;
-  Escape comes back. Tab reaches a diagram or an embedded picture, and Enter
-  or Space opens it the same way a click does.
+  Escape or the × in the corner comes back. Tab reaches a diagram or an
+  embedded picture, and Enter or Space opens it the same way a click does.
 - **Syntax highlighting** for fenced code blocks.
 - **Mermaid diagrams.** A ` ```mermaid ` block draws as a diagram, in the
   theme's own colours by default — a Settings choice keeps Mermaid's own light
