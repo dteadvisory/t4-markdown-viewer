@@ -1325,3 +1325,23 @@ tooling; listed so nobody rediscovers them.
   *Lifted 2026-10-10 (the change-review fix, ruling T2): above 250 000 text nodes a change
   inside the page waits, and the count says " (changed)"; Enter or typing re-indexes once
   (0.6-0.8 s on the fully loaded file, the Mac). Walked on all three.*
+- [x] **A heading's underline stops at the reading width** (added 2026-10-11,
+  `plans/reading-width.md`). Themes that rule a line under headings (github-light, github-dark
+  and their blue variants) drew it across the whole window; headings sit in the reading column
+  now (`plans/reading-width-centred.md`), so it ends at the column's edge, as the `---` rule and
+  the footnotes' border do.
+  *Kept 2026-10-11, owner's call, no trigger: it lines up with the text it underlines.*
+- [x] **A paragraph holding an image wasn't held to the reading width** (added 2026-10-11,
+  `plans/reading-width.md` L1). With a per-element width cap, a `p` holding any `img` kept the
+  whole window, so an inline icon's paragraph ran full width.
+  *Lifted 2026-10-11 (`plans/reading-width-centred.md`): the centred column holds every block;
+  a picture alone in its paragraph steps out, an inline one stays in its line.*
+- [x] **A list item holding wide content wasn't held to the reading width** (added 2026-10-11,
+  `plans/reading-width.md` L2). Its own text ran the full width.
+  *Lifted 2026-10-11 (`plans/reading-width-centred.md`): the item's text stays in the column;
+  only its wide content steps out.*
+- [x] **Indented text ended right of the paragraphs' edge** (added 2026-10-11,
+  `plans/reading-width.md` L3). Lists, quotes and definitions added their indent on top of the
+  width.
+  *Lifted 2026-10-11 (`plans/reading-width-centred.md`): indents sit inside the column, so every
+  right edge meets it.*

@@ -212,6 +212,8 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   readable; kept by the owner. A fix to start from: `font-size-adjust` on `#content` set to the
   theme font's own x-height ratio (support on WebKitGTK unverified). Reopen if Libron or another
   chosen font reads too small or large at the themes' sizes, or on a report about Tufte.
+  The reading width (`plans/reading-width.md`) is 75 characters of the document font, so a size
+  change keeps the line length and moves the edge with it.
 - [ ] **On macOS, Option+Left/Right in the tree filter and the find bar goes Back/Forward, not a
   word** (added 2026-10-09, `archive/plans/find-in-document.md`, ruling G). The app's Back/Forward
   shortcut takes the keys in both text fields, where macOS would move the caret by a word. Fix
@@ -224,6 +226,27 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   closed or open alike. First step: measure which part of a chunk's rendered HTML dominates
   (fold buttons, spans per value). Reopen on a report of a JSON file exhausting memory or
   freezing, or with the next JSON viewer work.
+- [ ] **In a narrow window a wide diagram shrinks until its labels can't be read** (added
+  2026-10-11, the reading-width walks, `plans/reading-width.md`). At ~700 px a 10-node `LR`
+  flowchart (natural ~2 240 px) is scaled to the ~610 px column on all three engines, and it
+  doesn't scroll in its box. It did the same before the reading width: mermaid's `width="100%"`
+  shrank it too. The zoom view shows it full size. A fix to start from: a smallest readable
+  scale, past which the drawing keeps that width and scrolls in its box. Reopen on a report of
+  unreadable diagrams in a narrow window, or with the next diagram layout work.
+- [ ] **On the Mac, find doesn't paint one match in a list item holding a nested list** (added
+  2026-10-11, the Mac's reading-width walk). In `walk.md`'s "A long item: lorem…", which holds
+  a nested list, the match is counted and stepped to ("1 of 8"), and the page scrolls to it,
+  but neither the match nor the current highlight is coloured; the other matches paint. The
+  build before the reading width does the same, and it stays with the item's width rule off.
+  Windows and Linux counted and stepped but weren't checked for that highlight's pixels. Cause
+  unknown. First step: reproduce on all three, and compare the match range's client rects with
+  a painted one's. Reopen with the next find work, or on a report.
+- [ ] **On the Mac, a clicked image-viewer button keeps a focus ring** (added 2026-10-11, the Mac's
+  centred-column walk). After a click on the image viewer's + or Fit, the button shows the blue
+  ring meant for keyboard focus, and it stays. Seen through the Mac's WebDriver clicks only, on
+  the new build only; Windows and Linux didn't report it. The change touched that toolbar's
+  spacing, not its focus styles. First step: a real mouse click on the Mac, on this build and on
+  1.8.0. Reopen with the next image viewer work, or on a report.
 
 ## Accepted limits
 
@@ -330,3 +353,34 @@ as it is found.
   keystroke costs ~0.2 s on a 519 000-element page: ~70 ms for any text field, ~100 ms more in
   the find field (cause unmeasured). Linux: none at 409 000 nodes.
   *Accepted 2026-10-10. Reopen on a report of typing lag on large documents.*
+- [ ] **Wide content nested in a list sits off-centre** (added 2026-10-11,
+  `plans/reading-width-centred.md` M1). A table, diagram or picture wider than the reading column
+  is centred on its own box, so inside a list item or quote it is centred on that item, shifted by
+  half the indents: three levels deep, a pane-wide table sat 42 px right of centre at 1600 px
+  (Windows, Linux; the Mac 91 px left against 7 right at 1512). In a narrow window its box can
+  pass the pane by a few px, which `overflow-x: clip` on the document cuts (2 px measured); the
+  page doesn't scroll sideways. A fix to start from: JavaScript that measures each nested block's
+  indent and shifts it back, again on resize.
+  *Accepted 2026-10-11. Reopen on a report of nested wide content looking off-centre or cut, or
+  with the next layout work.*
+- [ ] **A command in an unlabelled code block scrolls instead of wrapping** (added 2026-10-11,
+  `plans/reading-width-centred.md` M2). Only blocks in a shell language (`sh`, `bash`, `shell`,
+  `zsh`, `fish`, `console`, `shellsession`, `powershell`, `ps1`, `pwsh`, `cmd`, `bat`, `batch`)
+  wrap with a hanging indent; a bare fence or ` ```text ` scrolls like program code. Guessing
+  from the text (a `$ ` prompt) would misfire on some program code.
+  *Accepted 2026-10-11. Reopen on a report of commands in unlabelled blocks scrolling, or a
+  request to wrap them.*
+- [ ] **A full re-layout may be slightly slower on Windows** (added 2026-10-11, the
+  centred-column walks). Timing a full re-layout against 1.8.0: Linux and the Mac within noise
+  (README x30 225 → 230 ms and 109 → 114 ms; a ~10 MB JSON's first chunk 1030 → 1075 ms and
+  274 → 277 ms); Windows a little slower in both run orders (README x30 ~200 → ~225 ms, JSON
+  ~685 → ~730 ms), with a spread inside each run as large as the gap. Fold and unfold
+  unchanged. Not isolated: likely the split command blocks and the centred wide content.
+  *Accepted 2026-10-11. Reopen on a report of slowness on large documents.*
+- [ ] **A very long command block's cost is unmeasured** (added 2026-10-11, the centred-column
+  triage). Each shell block is rebuilt after highlighting, one element per line and one per
+  hyphen; the walks used blocks of a few lines. A long ` ```console ` log gets thousands of extra
+  elements. A fix to start from: split only blocks under a line count, and let longer ones
+  scroll.
+  *Accepted 2026-10-11. Reopen on a report of a slow page with a long log, or with the next
+  performance work.*
