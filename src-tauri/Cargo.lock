@@ -4215,7 +4215,7 @@ dependencies = [
 
 [[package]]
 name = "t4-markdown-viewer"
-version = "1.8.3"
+version = "1.8.4"
 dependencies = [
  "comrak",
  "dirs",
