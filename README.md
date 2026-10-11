@@ -47,9 +47,9 @@ Electron build starts around 150 MB.
   [Libron](https://github.com/nicoverbruggen/libron), a book font built into the
   app, in every theme. **Settings → Document font** takes another font installed
   on your computer, or clears to each theme's own.
-- **Reads like a page.** Text sits in a centred column about 75 characters wide;
-  tables, diagrams and pictures spread wider when they need to, and long shell
-  commands wrap.
+- **Reads like a page.** Text sits in a centred column about 90 characters wide,
+  about 120 in a wide window; tables, diagrams and pictures spread wider when they
+  need to, and long shell commands wrap.
 - **Live reload.** Edit in another editor; the view updates on save and keeps
   your scroll position.
 - **Tick task lists.** Click a checkbox and the `[ ]` in the file flips with it.

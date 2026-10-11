@@ -212,8 +212,8 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   readable; kept by the owner. A fix to start from: `font-size-adjust` on `#content` set to the
   theme font's own x-height ratio (support on WebKitGTK unverified). Reopen if Libron or another
   chosen font reads too small or large at the themes' sizes, or on a report about Tufte.
-  The reading width (`plans/reading-width.md`) is 75 characters of the document font, so a size
-  change keeps the line length and moves the edge with it.
+  The reading width (`plans/reading-width.md`) is 75ch of the document font (100ch in a wide
+  window), so a size change keeps the line length and moves the edge with it.
 - [ ] **On macOS, Option+Left/Right in the tree filter and the find bar goes Back/Forward, not a
   word** (added 2026-10-09, `archive/plans/find-in-document.md`, ruling G). The app's Back/Forward
   shortcut takes the keys in both text fields, where macOS would move the caret by a word. Fix

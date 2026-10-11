@@ -1445,8 +1445,15 @@ html.diagram-open {
   line-height: 1.7;
   /* A length; a theme may set its own, and one wider than any window (100vw) turns the limit off. */
   --measure: 75ch;
-  /* The reading column, centred in the pane: the sides take what the measure leaves. */
-  padding-inline: max(var(--content-pad), calc((100% - var(--measure)) / 2));
+  /* Once the margins together would pass the measure, the column widens to this. */
+  --measure-wide: 100ch;
+  /* The reading column, centred in the pane: the sides take what the measure leaves. The middle
+     term of the clamp jumps from below one measure to above the other within 0.025ch. */
+  padding-inline: max(
+    var(--content-pad),
+    calc((100% - clamp(var(--measure), (100% - 2 * var(--measure)) * 1000 + var(--measure),
+                       var(--measure-wide))) / 2)
+  );
   /* The page never scrolls sideways: wide content nested in a list can pass the pane by a few
      px, which is cut; `clip`, unlike `hidden`, makes no scroll container. */
   overflow-x: clip;
