@@ -146,6 +146,13 @@ Wide, with long cells:
 | --- | --- | --- | --- | --- |
 | Lorem ipsum dolor sit amet, consectetur adipiscing elit | sed do eiusmod tempor incididunt ut labore et dolore magna aliqua | Ut enim ad minim veniam, quis nostrud exercitation ullamco | laboris nisi ut aliquip ex ea commodo consequat | Duis aute irure dolor in reprehenderit in voluptate |
 
+Wide, with many text columns (too many to fit the cap at their narrowest):
+
+| Name | Owner | Status | Started | Due | Area | Risk | Notes | Next step | Blocked by |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Reading column | the viewer team | in review on three engines | early October | before the next release | document layout | low, CSS only | wraps prose at a readable width | walk the sample in every theme | nothing at the moment |
+| Table floors | the viewer team | trial build on Windows | this afternoon | once the trial is approved | tables in documents | medium, new JS | keeps text columns from going too thin | probe the other two engines | the owner's go on the trial |
+
 Wide, with many columns:
 
 | A | B | C | D | E | F | G | H | I | J | K | L | M | N | O |

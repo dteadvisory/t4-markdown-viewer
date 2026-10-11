@@ -393,6 +393,13 @@ function wrapTables(root) {
     wrap.className = "table-scroll";
     table.replaceWith(wrap);
     wrap.appendChild(table);
+    // A column of longer text keeps a floor when the table is squeezed (`th.floor`); one of
+    // short values keeps its own width. ponytail: text length stands in for measured width.
+    const head = table.rows[0];
+    if (!head) return;
+    for (let j = 0; j < head.cells.length; j++)
+      if ([...table.rows].some((r) => (r.cells[j]?.textContent.length ?? 0) > 14))
+        head.cells[j].classList.add("floor");
   });
 }
 

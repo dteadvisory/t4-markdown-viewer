@@ -1780,6 +1780,18 @@ html.diagram-open {
   border-spacing: 0;
   margin: 0 0 1em;
   font-size: 0.95em;
+  /* As wide as its content, capped at the wide measure (in the document's ch; this font is
+     0.95 of it), but never narrower than its columns at their floors: a table can't go below
+     its min-content. Not `max-width: max-content`, which WebKit ignores on a table. */
+  width: fit-content;
+  max-width: calc(var(--measure-wide) / 0.95);
+}
+
+/* The floor of a column of longer text (`wrapTables`). */
+.markdown-body th.floor::before {
+  content: "";
+  display: block;
+  width: 12ch;
 }
 
 .markdown-body th,
@@ -1788,6 +1800,9 @@ html.diagram-open {
   border-style: solid;
   padding: 0.4em 0.8em;
   text-align: left;
+  /* A column is never narrower than its longest word, bar a rounding: break-word would then
+     split that word ("medium" / ", new JS"). */
+  overflow-wrap: normal;
 }
 
 .markdown-body th {
