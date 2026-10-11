@@ -384,3 +384,19 @@ as it is found.
   scroll.
   *Accepted 2026-10-11. Reopen on a report of a slow page with a long log, or with the next
   performance work.*
+- [ ] **A table column's floor is judged by character count** (added 2026-10-11,
+  `plans/table-cap.md`). A column gets its 12ch floor when a cell has more than 14 characters,
+  standing in for "would this column wrap". Characters about 2ch wide, as in Chinese, Japanese
+  or Korean, which can also break between any two, are undercounted: a column of 8-character
+  phrases (about 16ch) gets no floor and could squeeze to a character a line in a crowded
+  table. Reasoned, not measured; Latin text is unaffected. A fix to start from: count wide
+  characters double, or measure the columns' real widths.
+  *Accepted 2026-10-11. Reopen on a report of a squeezed column in CJK or other non-Latin text,
+  or a request to support such documents.*
+- [ ] **A table written in HTML gets no column floors** (added 2026-10-11,
+  `plans/table-cap.md`, ruling R2). With no `<th>` header row the floor class lands on a `<td>`
+  the CSS doesn't match, and a `colspan` makes the floor check count columns wrong. Such a
+  table is still capped at 100ch, its columns shrinking to their longest word. Markdown tables
+  always have a header row and no spans.
+  *Accepted 2026-10-11. Reopen on a report of a hand-written HTML table with squeezed
+  columns.*
