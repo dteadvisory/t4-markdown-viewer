@@ -201,6 +201,11 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .claude/skills/drive-app/scr
   Win32 `MoveWindow` from PowerShell — but `MoveWindow` ignores the window's
   minimum size and will happily set it smaller. Test a minimum with a real
   corner drag instead (`drag-corner.ps1`).
+- **Measuring `ch`.** Take it from a `width: 100ch` box divided by 100, not
+  from a "0" span's `getBoundingClientRect()`: the span's box is snapped to
+  1/64 px, so in Palatino it read 8.40625 against a CSS `ch` of 8.395 (0.13%
+  wider; the snapping is inferred from the numbers), enough to put "1 px under
+  a switch width" past it and fake a mismatch.
 - **A reload now comes back with the window's last-reported tabs**, not a
   boot at 0 tabs: `location.reload()` reopens whatever the window last
   reported, so a clean page needs a fresh relaunch, not a reload.
