@@ -161,17 +161,35 @@ Wide, with many columns:
 
 ## Images
 
-Narrow (240 px):
+SVG pictures stay in the column. No width given, only a viewBox (fills the column, as an
+exported diagram does):
+
+![no width](img/width-none.svg)
+
+SVG, narrow (240 px):
 
 ![narrow](img/width-narrow.svg)
 
-Medium (560 px):
+SVG, medium (560 px):
 
 ![medium](img/width-medium.svg)
 
-Wide (1800 px):
+SVG, wide (1800 px, shrunk to the column):
 
 ![wide](img/width-wide.svg)
+
+Raster pictures keep their own size and step out of the column, up to the window. PNG,
+narrow (240 px):
+
+![narrow PNG](img/raster-narrow.png)
+
+PNG, medium (560 px):
+
+![medium PNG](img/raster-medium.png)
+
+PNG, wide (1800 px, stepping out to the window):
+
+![wide PNG](img/raster-wide.png)
 
 Inline, in a sentence of text: the icon ![icon](img/icon.png) sits in this line, which goes on
 long enough to show whether a paragraph holding an image keeps to the reading width or not.

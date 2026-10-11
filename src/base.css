@@ -1539,6 +1539,19 @@ html.diagram-open {
   height: auto;
 }
 
+/*
+ * An SVG picture stays in the column instead, centred, a wider one shrunk to it. Stepping out
+ * pushes a picture half the column right, and an SVG with no width of its own, as an exported
+ * diagram often has, then stretches into only the half left over; here it fills the column.
+ * Told by its source: a file (the app adds `?v=`), a URL, or inline data.
+ */
+.markdown-body img.block:is([src*=".svg?" i], [src$=".svg" i], [src^="data:image/svg+xml" i]) {
+  width: auto;
+  max-width: 100%;
+  margin-inline: auto;
+  translate: none;
+}
+
 .markdown-body > *:first-child {
   margin-top: 0;
 }

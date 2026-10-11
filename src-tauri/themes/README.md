@@ -55,13 +55,13 @@ table collapsing, the shared document type scale and spacing, and the reading
 width. It deliberately declares no document colors.
 
 The reading width is a centred column 75ch wide, widening to 100ch once the
-margins together would pass 75ch. Tables, diagrams and pictures wider than it
-step out of it, centred; code stays in it. A table steps out only to 100ch,
-wrapping its cells, and goes wider only when its columns can't fit. A theme can
-change these with `--measure` and `--measure-wide` on `.markdown-body`, both
-lengths; a `--measure` wider than any window (`100vw`) turns the limit off,
-and a `--measure-wide` of `100vw` lifts the tables' cap (and the prose's wide
-step with it).
+margins together would pass 75ch. Tables, diagrams and raster pictures wider
+than it step out of it, centred; code and SVG pictures stay in it. A table
+steps out only to 100ch, wrapping its cells, and goes wider only when its
+columns can't fit. A theme can change these with `--measure` and
+`--measure-wide` on `.markdown-body`, both lengths; a `--measure` wider than any
+window (`100vw`) turns the limit off, and a `--measure-wide` of `100vw` lifts
+the tables' cap (and the prose's wide step with it).
 
 A theme owns **every color** — and, on top of that, whatever bits of the type
 scale or spacing it wants different; leave the rest out and base.css supplies

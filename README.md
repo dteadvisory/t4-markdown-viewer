@@ -48,8 +48,8 @@ Electron build starts around 150 MB.
   app, in every theme. **Settings → Appearance → Document font** takes another
   font installed on your computer, or clears to each theme's own.
 - **Reads like a page.** Text sits in a centred column about 90 characters wide,
-  about 120 in a wide window; tables, diagrams and pictures spread wider when they
-  need to, and long shell commands wrap.
+  about 120 in a wide window; tables, diagrams and raster pictures spread wider
+  when they need to, SVG pictures fit the column, and long shell commands wrap.
 - **Live reload.** Edit in another editor; the view updates on save and keeps
   your scroll position.
 - **Tick task lists.** Click a checkbox and the `[ ]` in the file flips with it.
