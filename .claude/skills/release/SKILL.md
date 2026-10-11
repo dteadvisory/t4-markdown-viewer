@@ -76,10 +76,25 @@ v1.3.0 shipping an installer named 1.2.0, which the updater then refuses.
    same suite on all three platforms, so a failure here is a failure there. The
    release build does not run the tests itself; the Release workflow runs the
    same checks separately, at the tagged commit.
-3. **Bump** `Cargo.toml`, then `cargo check` to refresh `Cargo.lock`. Plain
+3. **Get the version from the owner.** Never choose it. Ask it as its own
+   question, with a recommendation and its reasons, and bump only once the
+   owner names the number; a go to release, or a "probably x.y.z?" left
+   unanswered, is not a version. Recommend by this project's pattern, not by
+   textbook semver or by how much work went in:
+   - **Minor** only for something the app could not do before. Every minor
+     since 1.0: macOS and Linux (1.1), update check (1.2), images (1.3),
+     folder sidebar (1.4), theme families (1.5), JSON (1.6), Mermaid (1.7),
+     find (1.8).
+   - **Patch** for everything else: a fix, or a follow-up or change to what
+     the app already does, however large (the centred reading column, 1.8.1).
+
+   A published version cannot be taken back: 1.9.0 went out unasked for the
+   centred column and was withdrawn within the hour, and copies that took it
+   cannot step down to 1.8.1.
+4. **Bump** `Cargo.toml`, then `cargo check` to refresh `Cargo.lock`. Plain
    `x.y.z` only — the rpm tooling rejects a `-rc.1` suffix, and the workflow
    refuses such a tag, but only once the tag is already public. Catch it here.
-4. **Commit the bump on its own**, touching only those two files:
+5. **Commit the bump on its own**, touching only those two files:
 
    ```
    Release 1.3.0
@@ -89,7 +104,7 @@ v1.3.0 shipping an installer named 1.2.0, which the updater then refuses.
    commits' subject lines, not from here.>
    ```
 
-5. **Tag and push:**
+6. **Tag and push:**
 
    ```sh
    git tag v1.3.0
@@ -100,9 +115,9 @@ v1.3.0 shipping an installer named 1.2.0, which the updater then refuses.
    Push the branch before the tag, or CI builds a commit GitHub does not have.
    The release does not depend on that run: it runs the same checks itself, at
    the tagged commit, and publishes nothing unless they pass.
-6. **Approve the build.** The run waits at the three build legs until the owner
+7. **Approve the build.** The run waits at the three build legs until the owner
    approves the `signing` environment (see *Signing*).
-7. **Tick first runs.** If `docs/open-items.md` has a *First runs* section, tick
+8. **Tick first runs.** If `docs/open-items.md` has a *First runs* section, tick
    every sub-item this release (or the push before it) proved, with the run id,
    and move the item to `closed-items.md` once all are ticked. Commit as `docs:`.
 
