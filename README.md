@@ -56,9 +56,10 @@ Electron build starts around 150 MB.
 - **Diagrams you can actually read.** A link to an SVG or an image opens it in a
   tab of its own, with zoom and pan — a wide ERD is unreadable at column width.
   Clicking a picture embedded in a document opens the same view. A Mermaid
-  diagram opens full window over the document, with the same zoom and pan;
-  Escape or the × in the corner comes back. Tab reaches a diagram or an
-  embedded picture, and Enter or Space opens it the same way a click does.
+  diagram opens full window over the document, its text at the document's size,
+  with the same zoom and pan; Escape or the × in the corner comes back. Tab
+  reaches a diagram or an embedded picture, and Enter or Space opens it the
+  same way a click does.
 - **Syntax highlighting** for fenced code blocks.
 - **Mermaid diagrams.** A ` ```mermaid ` block draws as a diagram, in the
   theme's own colours by default — a Settings choice keeps Mermaid's own light

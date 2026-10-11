@@ -1368,6 +1368,17 @@ function openDiagram(fig) {
   els.diagramDialog.showModal();
   document.documentElement.classList.add("diagram-open");
   zoomDiagram(1);
+  // Opened with its labels at the size of the document's text, not at Fit,
+  // where a big diagram's shrink and a small one's swell; Fit is a click away.
+  // The middle label size, so a chart's bigger title or smaller ticks don't set
+  // it. A label's size on screen is its font size in the drawing's units times
+  // the drawing's scale.
+  const sizes = [...svg.querySelectorAll("text, foreignObject span")]
+    .filter((el) => el.textContent.trim())
+    .map((el) => parseFloat(getComputedStyle(el).fontSize))
+    .sort((a, b) => a - b);
+  const shown = sizes.length && sizes[sizes.length >> 1] * svg.getScreenCTM().a;
+  if (shown) zoomDiagram(parseFloat(getComputedStyle(els.content).fontSize) / shown);
   els.diagramView.scrollTo(0, 0);
   els.diagramView.focus();
 }
