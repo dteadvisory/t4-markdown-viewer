@@ -1345,3 +1345,11 @@ tooling; listed so nobody rediscovers them.
   width.
   *Lifted 2026-10-11 (`plans/reading-width-centred.md`): indents sit inside the column, so every
   right edge meets it.*
+- [x] **Settings tabs: three small things the walks found** (added 2026-10-11, the Settings tabs
+  checks on all three engines). General is about 845 px tall, so it scrolls a little even in a
+  768-860 px window (the title, tabs and Done stay pinned). On WebKit (Mac and Linux) a mouse
+  open shows a focus ring on the General tab, as the old dialog did on the theme dropdown; and
+  on the Mac, ←/→ after a mouse click on a tab move the focus without a ring until Tab is
+  pressed.
+  *Kept 2026-10-11 (owner): the scroll is one short move; the rings are the engine's own
+  focus-visible rules, and the selected pill shows where you are.*
