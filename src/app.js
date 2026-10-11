@@ -564,8 +564,11 @@ function loadRenderer() {
         const timer = setTimeout(stop, RENDER_TIMEOUT);
         waiting.set(mine, (result) => (clearTimeout(timer), settle(result)));
         // The width goes with the request: the frame may run in a process of
-        // its own, where a resize could land after the render.
-        frame.contentWindow.postMessage({ n: mine, config, id, source, width: document.body.offsetWidth }, "*");
+        // its own, where a resize could land after the render. The window's
+        // outer width while it is still hidden at launch: WebKitGTK lays the
+        // page out at 0 until it shows, and a gantt drawn 0 wide is blank.
+        const width = document.body.offsetWidth || outerWidth;
+        frame.contentWindow.postMessage({ n: mine, config, id, source, width }, "*");
       });
     };
     function onMessage(e) {
