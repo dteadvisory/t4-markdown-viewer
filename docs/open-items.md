@@ -400,3 +400,12 @@ as it is found.
   always have a header row and no spans.
   *Accepted 2026-10-11. Reopen on a report of a hand-written HTML table with squeezed
   columns.*
+- [ ] **A gantt in a restored tab on Linux is drawn at the default window width** (added
+  2026-10-11, the launch-gantt fix `94bb3e8`). Diagrams in the documents a window opens at
+  launch are drawn before it shows; while hidden, WebKitGTK gives the page no width, so the
+  window's outer width stands in. That is still tauri.conf's 1100 when the session brings the
+  window back at a saved size (measured: restored at 1500, gantt 1100 wide, centred in the
+  pane). Not blank, and the same as any gantt after a resize, which is not redrawn at the new
+  width. Windows and macOS unmeasured.
+  *Accepted 2026-10-11. Reopen if gantts start redrawing on resize, or on a report of a narrow
+  restored gantt.*
