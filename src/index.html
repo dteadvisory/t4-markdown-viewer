@@ -12,18 +12,15 @@
     <header id="bar">
       <div id="bar-row">
         <div id="nav">
+          <button id="folder-btn" class="nav" type="button" title="Show or hide this file's folder (Ctrl+Shift+O)" aria-label="Show or hide folder">
+            <svg aria-hidden="true"><use href="#icon-folder" /></svg>
+          </button>
           <button id="back-btn" class="nav" type="button" title="Back (Alt+Left)" aria-label="Back" disabled>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 L5 8 L10 13" /></svg>
           </button>
           <button id="fwd-btn" class="nav" type="button" title="Forward (Alt+Right)" aria-label="Forward" disabled>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M6 3 L11 8 L6 13" /></svg>
           </button>
-          <button id="folder-btn" class="nav" type="button" title="Show or hide this file's folder (Ctrl+Shift+O)" aria-label="Show or hide folder">
-            <svg aria-hidden="true"><use href="#icon-folder" /></svg>
-          </button>
-        </div>
-        <div id="doc-name" title=""></div>
-        <div id="controls">
           <!-- Split button: the face does whatever Settings says, the arrow
                offers the other one for this open only. -->
           <div id="open-split">
@@ -38,7 +35,9 @@
               <button type="button" role="menuitem" data-mode="window">Open in new window</button>
             </div>
           </div>
-
+        </div>
+        <div id="doc-name" title=""></div>
+        <div id="controls">
           <!-- Unhidden only once a check has found a newer release. -->
           <button id="update-btn" type="button" hidden title="A new version is available">Update</button>
 

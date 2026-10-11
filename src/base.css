@@ -131,8 +131,12 @@ body {
   gap: 0.25rem;
 }
 
-/* A step apart from Back/Forward: it is not the third of a set. */
+/* A step apart from Back/Forward on either side: neither is the third of a set. */
 #nav #folder-btn {
+  margin-right: 0.25rem;
+}
+
+#nav #open-split {
   margin-left: 0.25rem;
 }
 
@@ -333,6 +337,12 @@ body {
   border-radius: 4px;
   background: var(--ui-bg);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+/* Under a button at the bar's left, so it hangs to the right. */
+#open-menu {
+  left: 0;
+  right: auto;
 }
 
 #open-menu[hidden],
