@@ -677,6 +677,12 @@ li[aria-expanded="true"] > .tree-row .tree-twist {
  * theme file needs to know this dialog exists.
  */
 #settings-dialog {
+  /* Hung from the top, not centred: the tabs differ in height, and centring would move the
+     tab strip from under the pointer on every switch. */
+  margin-top: 2.5rem;
+  max-height: calc(100% - 5rem);
+  /* Scrolling past the end stops here, not in the document behind. */
+  overscroll-behavior: contain;
   max-width: 30rem;
   padding: 0;
   border: 1px solid var(--ui-border);
@@ -686,10 +692,11 @@ li[aria-expanded="true"] > .tree-row .tree-twist {
   font: 400 0.875rem/1.5 "Segoe UI", system-ui, sans-serif;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
   /* Focus scrolls a control into view only when it is out of sight; the
-     pinned footer hides the bottom of the box, so take its height off what
-     counts as in sight. The footer is about 3.8rem tall: change both
-     together. */
+     pinned footer and header hide the bottom and top of the box, so take
+     their heights off what counts as in sight. The footer is about 3.8rem
+     tall and the header about 3.6rem: change each with its rule. */
   scroll-padding-bottom: 4rem;
+  scroll-padding-top: 3.75rem;
 }
 
 /*
@@ -705,10 +712,53 @@ li[aria-expanded="true"] > .tree-row .tree-twist {
   padding: 1.25rem 1.5rem 1rem;
 }
 
+/* The title, and the tabs beside it, as in t4-git-ui. Pinned to the top of the dialog's scroll
+   box, like the Done row to its foot: General scrolls even in an ordinary window, and the tabs
+   should not go with it. The margins and padding work as #settings-actions' do. */
+#settings-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -1.25rem -1.5rem 0.5rem;
+  padding: 1.25rem 1.5rem 0.5rem;
+  background: var(--ui-bg);
+}
+
 #settings-title {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
+}
+
+#settings-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+#settings-tabs button {
+  padding: 0.25rem 0.75rem;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--ui-fg-muted);
+  font: inherit;
+}
+
+#settings-tabs button:hover {
+  color: var(--ui-fg);
+}
+
+#settings-tabs button[aria-selected="true"] {
+  background: color-mix(in srgb, var(--ui-fg) 12%, transparent);
+  color: var(--ui-fg);
+}
+
+#settings-tabs button:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 1px;
 }
 
 #settings-dialog fieldset {

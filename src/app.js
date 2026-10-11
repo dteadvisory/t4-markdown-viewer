@@ -37,6 +37,7 @@ const els = {
   sortMenu: document.getElementById("sort-menu"),
   settingsBtn: document.getElementById("settings-btn"),
   settings: document.getElementById("settings-dialog"),
+  settingsTabs: document.getElementById("settings-tabs"),
   modeRadios: document.querySelectorAll('#settings-dialog input[name="open-mode"]'),
   reopenRadios: document.querySelectorAll('#settings-dialog input[name="reopen"]'),
   diagramColourRadios: document.querySelectorAll('#settings-dialog input[name="diagram-colours"]'),
@@ -4948,10 +4949,29 @@ async function onKeydown(event) {
     // Cmd+, is the Mac idiom for preferences, and the editors copied it onto
     // the other two platforms. Same door as the gear.
     event.preventDefault();
-    showOpenMenu(false);
-    showDocFontNote(els.docFont.value);
-    els.settings.showModal();
+    openSettings();
   }
+}
+
+/** Settings opens on General, where the update check is, whatever tab it closed on. */
+function openSettings() {
+  showOpenMenu(false);
+  showDocFontNote(els.docFont.value);
+  selectSettingsTab("settings-general");
+  els.settings.showModal();
+  els.settings.scrollTop = 0; // a closed dialog keeps its scroll, and would not take this
+}
+
+/** Shows one panel; its tab is the strip's only tab stop, as a tab strip is expected to be. */
+function selectSettingsTab(panelId) {
+  for (const tab of els.settingsTabs.children) {
+    const on = tab.getAttribute("aria-controls") === panelId;
+    tab.setAttribute("aria-selected", on);
+    tab.tabIndex = on ? 0 : -1;
+    document.getElementById(tab.getAttribute("aria-controls")).hidden = !on;
+  }
+  // From the top, so a scrolled panel can't leave the strip higher than the last time.
+  els.settings.scrollTop = 0;
 }
 
 /** Thumb buttons on a mouse, as in a browser. */
@@ -5102,10 +5122,20 @@ async function main() {
     true,
   );
 
-  els.settingsBtn.addEventListener("click", () => {
-    showOpenMenu(false);
-    showDocFontNote(els.docFont.value);
-    els.settings.showModal();
+  els.settingsBtn.addEventListener("click", openSettings);
+  els.settingsTabs.addEventListener("click", (e) => {
+    const tab = e.target.closest('[role="tab"]');
+    if (tab) selectSettingsTab(tab.getAttribute("aria-controls"));
+  });
+  // ←/→ move along the strip, wrapping, and take the focus with them.
+  els.settingsTabs.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const tabs = [...els.settingsTabs.children];
+    const i = tabs.indexOf(document.activeElement);
+    const next = tabs[(i + (e.key === "ArrowRight" ? 1 : tabs.length - 1)) % tabs.length];
+    selectSettingsTab(next.getAttribute("aria-controls"));
+    next.focus();
   });
   for (const radio of els.modeRadios) {
     radio.addEventListener("change", () => {

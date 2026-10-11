@@ -171,76 +171,86 @@
          you were reading, and every window shares these values anyway. -->
     <dialog id="settings-dialog" aria-labelledby="settings-title">
       <form method="dialog">
-        <h2 id="settings-title">Settings</h2>
+        <div id="settings-head">
+          <h2 id="settings-title">Settings</h2>
+          <div id="settings-tabs" role="tablist" aria-label="Settings sections">
+            <button type="button" role="tab" id="settings-tab-general" aria-controls="settings-general" aria-selected="true">General</button>
+            <button type="button" role="tab" id="settings-tab-appearance" aria-controls="settings-appearance" aria-selected="false" tabindex="-1">Appearance</button>
+          </div>
+        </div>
 
-        <fieldset>
-          <legend>Theme</legend>
-          <p class="hint">
-            Applies the moment you pick it, so the document behind this dialog previews the choice.
-            <kbd>F8</kbd> cycles without opening Settings, and keeps working while it is open.
-          </p>
-          <select id="theme-picker" aria-label="Theme"></select>
-          <p class="hint diagram-colours-hint">Diagrams draw in the theme's colours, or in Mermaid's own light or dark ones.</p>
-          <label><input type="radio" name="diagram-colours" value="theme" /> Diagrams follow the theme</label>
-          <label><input type="radio" name="diagram-colours" value="mermaid" /> Diagrams in Mermaid's own colours</label>
-        </fieldset>
+        <div id="settings-general" role="tabpanel" aria-labelledby="settings-tab-general">
+          <fieldset>
+            <legend>Updates</legend>
+            <p class="hint">
+              Asks GitHub once per launch whether there is a newer version. Nothing is downloaded or
+              installed until you ask for it.
+            </p>
+            <label><input type="checkbox" id="auto-update" /> Check for updates automatically</label>
+            <p id="update-check-row">
+              <button id="check-now" class="minor" type="button">Check now</button>
+              <span id="update-status" role="status"></span>
+              <!-- Unhidden by the same check that unhides the bar's Update button. -->
+              <button id="settings-update" class="minor" type="button" hidden>Update…</button>
+            </p>
+            <p class="hint">Version <span id="app-version"></span></p>
+          </fieldset>
 
-        <fieldset>
-          <legend>Document font</legend>
-          <p class="hint">
-            The font for the document's text in every theme; code keeps its own. <b>Libron</b> is
-            built in. Type another font's family name as installed on this computer, or clear the field
-            for the theme's own font. Restart the app after installing a font.
-          </p>
-          <input id="doc-font" type="text" aria-label="Document font" placeholder="The theme's own font"
-                 spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" />
-          <p id="doc-font-note" class="hint" role="status"></p>
-        </fieldset>
+          <fieldset>
+            <legend>Opening a file</legend>
+            <p class="hint">
+              Where a document goes when you double-click a <code>.md</code> file in Explorer, press
+              <kbd>Ctrl</kbd>+<kbd>O</kbd>, or click the <b>Open</b> button. Shared by every window.
+            </p>
+            <label><input type="radio" name="open-mode" value="tab" /> In a new tab</label>
+            <label><input type="radio" name="open-mode" value="window" /> In a new window</label>
+            <p class="hint">
+              <kbd>Ctrl</kbd>+<kbd>T</kbd>, <kbd>Ctrl</kbd>+<kbd>N</kbd> and the arrow beside
+              <b>Open</b> override this for a single file.
+            </p>
+          </fieldset>
 
-        <fieldset>
-          <legend>Opening a file</legend>
-          <p class="hint">
-            Where a document goes when you double-click a <code>.md</code> file in Explorer, press
-            <kbd>Ctrl</kbd>+<kbd>O</kbd>, or click the <b>Open</b> button. Shared by every window.
-          </p>
-          <label><input type="radio" name="open-mode" value="tab" /> In a new tab</label>
-          <label><input type="radio" name="open-mode" value="window" /> In a new window</label>
-          <p class="hint">
-            <kbd>Ctrl</kbd>+<kbd>T</kbd>, <kbd>Ctrl</kbd>+<kbd>N</kbd> and the arrow beside
-            <b>Open</b> override this for a single file.
-          </p>
-        </fieldset>
+          <fieldset>
+            <legend>Reopening</legend>
+            <p class="hint">
+              What to do at startup with the tabs and windows you had open last time. They are written
+              down as you work, so a crash or a power cut costs only the last moment.
+            </p>
+            <label><input type="radio" name="reopen" value="restore" /> Restore my tabs and windows</label>
+            <label><input type="radio" name="reopen" value="ask" /> Ask me each time</label>
+            <label><input type="radio" name="reopen" value="off" /> Start fresh</label>
+            <p class="hint">
+              <b>Ask me each time</b> puts a <b>Reopen</b> button on the empty screen.
+              <b>Start fresh</b> keeps nothing at all, and forgets what is saved right away.
+            </p>
+          </fieldset>
+        </div>
 
-        <fieldset>
-          <legend>Reopening</legend>
-          <p class="hint">
-            What to do at startup with the tabs and windows you had open last time. They are written
-            down as you work, so a crash or a power cut costs only the last moment.
-          </p>
-          <label><input type="radio" name="reopen" value="restore" /> Restore my tabs and windows</label>
-          <label><input type="radio" name="reopen" value="ask" /> Ask me each time</label>
-          <label><input type="radio" name="reopen" value="off" /> Start fresh</label>
-          <p class="hint">
-            <b>Ask me each time</b> puts a <b>Reopen</b> button on the empty screen.
-            <b>Start fresh</b> keeps nothing at all, and forgets what is saved right away.
-          </p>
-        </fieldset>
+        <div id="settings-appearance" role="tabpanel" aria-labelledby="settings-tab-appearance" hidden>
+          <fieldset>
+            <legend>Theme</legend>
+            <p class="hint">
+              Applies the moment you pick it, so the document behind this dialog previews the choice.
+              <kbd>F8</kbd> cycles without opening Settings, and keeps working while it is open.
+            </p>
+            <select id="theme-picker" aria-label="Theme"></select>
+            <p class="hint diagram-colours-hint">Diagrams draw in the theme's colours, or in Mermaid's own light or dark ones.</p>
+            <label><input type="radio" name="diagram-colours" value="theme" /> Diagrams follow the theme</label>
+            <label><input type="radio" name="diagram-colours" value="mermaid" /> Diagrams in Mermaid's own colours</label>
+          </fieldset>
 
-        <fieldset>
-          <legend>Updates</legend>
-          <p class="hint">
-            Asks GitHub once per launch whether there is a newer version. Nothing is downloaded or
-            installed until you ask for it.
-          </p>
-          <label><input type="checkbox" id="auto-update" /> Check for updates automatically</label>
-          <p id="update-check-row">
-            <button id="check-now" class="minor" type="button">Check now</button>
-            <span id="update-status" role="status"></span>
-            <!-- Unhidden by the same check that unhides the bar's Update button. -->
-            <button id="settings-update" class="minor" type="button" hidden>Update…</button>
-          </p>
-          <p class="hint">Version <span id="app-version"></span></p>
-        </fieldset>
+          <fieldset>
+            <legend>Document font</legend>
+            <p class="hint">
+              The font for the document's text in every theme; code keeps its own. <b>Libron</b> is
+              built in. Type another font's family name as installed on this computer, or clear the field
+              for the theme's own font. Restart the app after installing a font.
+            </p>
+            <input id="doc-font" type="text" aria-label="Document font" placeholder="The theme's own font"
+                   spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" />
+            <p id="doc-font-note" class="hint" role="status"></p>
+          </fieldset>
+        </div>
 
         <div id="settings-actions"><button value="close">Done</button></div>
       </form>

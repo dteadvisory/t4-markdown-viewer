@@ -45,8 +45,8 @@ Electron build starts around 150 MB.
   folder. The default is Azure DevOps Dark.
 - **Reads in Libron.** Documents are set in
   [Libron](https://github.com/nicoverbruggen/libron), a book font built into the
-  app, in every theme. **Settings → Document font** takes another font installed
-  on your computer, or clears to each theme's own.
+  app, in every theme. **Settings → Appearance → Document font** takes another
+  font installed on your computer, or clears to each theme's own.
 - **Reads like a page.** Text sits in a centred column about 90 characters wide,
   about 120 in a wide window; tables, diagrams and pictures spread wider when they
   need to, and long shell commands wrap.
@@ -110,9 +110,9 @@ the toolbar. Clicking through it downloads the new version, installs it, and
 restarts with your windows and tabs where they were. Nothing is downloaded
 before you say so.
 
-Turn the check off in **Settings → Updates**; **Check now** there works either
-way, shows the version you are on, and offers the update right there when it
-finds one.
+Turn the check off in **Settings → General → Updates**; **Check now** there
+works either way, shows the version you are on, and offers the update right
+there when it finds one.
 
 Two things it deliberately does not do. It never installs silently — an app
 without a trusted signature that swaps itself out behind your back has earned
@@ -301,12 +301,12 @@ in-page jump it really is, not a reload of the page you are on.
 
 ![Settings](docs/screenshots/settings.png)
 
-The **gear** opens Settings, where a pair of radio buttons decides where a file
-opens: in a new tab, or in a new window. That covers every way a document
-arrives without you saying otherwise — double-clicking it in your file manager,
-`Ctrl+O`, or the **Open** button. It is shared by every open window, because a
-double-click has to land *somewhere* and per-window disagreement about that is
-unguessable.
+The **gear** opens Settings, where a pair of radio buttons on the General tab
+decides where a file opens: in a new tab, or in a new window. That covers every
+way a document arrives without you saying otherwise — double-clicking it in your
+file manager, `Ctrl+O`, or the **Open** button. It is shared by every open
+window, because a double-click has to land *somewhere* and per-window
+disagreement about that is unguessable.
 
 To go against the default just this once, use the **arrow beside Open** — it
 offers *Open in new tab* and *Open in new window* directly, and changes nothing
@@ -360,7 +360,7 @@ gives the app no warning (a crash, a power cut, a `taskkill /F`, a shutdown, or
 a Quit from the Dock or the app switcher) costs only what changed since things
 last stood still for half a second.
 
-**Settings → Reopening** decides what the next launch makes of it:
+**Settings → General → Reopening** decides what the next launch makes of it:
 
 - **Restore my tabs and windows** — everything comes back on its own. A file you
   double-clicked to start the app opens in the main window, with the saved
@@ -423,16 +423,16 @@ It shows up in the Settings list immediately and re-applies every time you save
 it. A file there shadows a bundled theme with the same name. Full contract in
 [`src-tauri/themes/README.md`](src-tauri/themes/README.md).
 
-Themes are picked from the dropdown in **Settings** (the gear), and applied the
-moment you select one — the document behind the dialog is the preview, which is
-why that dialog's backdrop is barely tinted. `F8` cycles without opening
+Themes are picked from the dropdown in **Settings → Appearance** (the gear), and
+applied the moment you select one — the document behind the dialog is the
+preview, which is why that dialog's backdrop is barely tinted. `F8` cycles without opening
 Settings, and keeps working while it is open.
 
 ### Document font
 
 Documents are set in Libron, a font made for reading and built into the app, in
 every theme; code keeps the theme's monospace font, and diagrams follow the
-document. **Settings → Document font** changes it for every window:
+document. **Settings → Appearance → Document font** changes it for every window:
 
 - Type the family name of a font installed on your computer. The note under the
   field says whether it is there. A font installed while the app is running
@@ -576,9 +576,9 @@ carry a `#` fragment, since `#` starts a comment anywhere in a sequence link
 (`notes.md#part` and `https://x/#a` are cut too). A relative file or a web
 address without a fragment works.
 
-Diagrams take their colours from the theme by default — **Settings → Theme**
-offers **Diagrams in Mermaid's own colours**, light or dark, instead, a choice
-shared by every window. With **Diagrams follow the theme**, a diagram's palette
+Diagrams take their colours from the theme by default — **Settings → Appearance
+→ Theme** offers **Diagrams in Mermaid's own colours**, light or dark, instead, a
+choice shared by every window. With **Diagrams follow the theme**, a diagram's palette
 (part of what it is cached under, so switching either redraws it) comes from how
 the theme styles a document: the page background, the prose text colour, the
 code-block background and the link colour, with category colours (pie slices,
