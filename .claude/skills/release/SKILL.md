@@ -99,9 +99,10 @@ v1.3.0 shipping an installer named 1.2.0, which the updater then refuses.
    ```
    Release 1.3.0
 
-   <a short paragraph in prose about what this release gives the reader.
-   This is for `git log` only — the release page is built from the feature
-   commits' subject lines, not from here.>
+   <one line per topic this release gives the reader, as `CLAUDE.md` →
+   *Commit messages* says: at most 72 characters each, a blank line between
+   topics, no bullets. This is for `git log` only — the release page is
+   built from the feature commits' subject lines, not from here.>
    ```
 
 6. **Tag and push:**

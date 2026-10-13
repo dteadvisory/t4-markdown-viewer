@@ -247,6 +247,15 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   the new build only; Windows and Linux didn't report it. The change touched that toolbar's
   spacing, not its focus styles. First step: a real mouse click on the Mac, on this build and on
   1.8.0. Reopen with the next image viewer work, or on a report.
+- [ ] **Older commit messages carry Claude trailers and session links** (added 2026-10-13,
+  `archive/plans/rewrite-commit-messages.md`). 279 commits end in `Co-Authored-By: Claude`,
+  13 in a `Claude-Session:` link. A rewrite was planned and its drafts reviewed, but shelved:
+  GitHub keeps `refs/pull/N/head` for every pull request, and those keep 244 of the 284 old
+  commits fetchable by hash, all 13 session commits included, so a rewrite can't take them off
+  GitHub. Only GitHub Support can, by deleting PRs #3–#11 and running garbage collection.
+  New commits are covered by `CLAUDE.md` → "Commit messages" and by `attribution` turned off in
+  the user settings. Reopen if the old messages must leave GitHub: start with the Support
+  request, then the plan.
 
 ## Accepted limits
 

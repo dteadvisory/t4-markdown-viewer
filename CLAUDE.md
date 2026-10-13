@@ -31,6 +31,25 @@ Follow these steps in order. Don't skip a step, and don't merge two steps into o
    - **Ask explicitly before every push, PR, tag and release.** Never do any of them on your own. A go on the task
      is not a go to push; each needs the owner's go-ahead at that moment.
 
+## Commit messages
+
+- **Summary line:** a plain sentence with no full stop at the end. Aim for 72 characters; never go over 100.
+  - Without a prefix, it's a release-note line: say what changed for someone using the app, not which code changed.
+  - With a `docs:`, `ci:` or `chore:` prefix, just say what changed.
+  - After the colon, start lowercase unless the first word is a name, an acronym or a code identifier.
+- **Prefixes:** start housekeeping commits with `docs:`, `ci:` or `chore:`, and name release commits
+  `Release X.Y.Z`. Release notes are built from summary lines and leave these out (`release.yml`, "Build the release
+  notes").
+- **Body:**
+  - None, if the summary line says it all.
+  - Otherwise 1–2 lines.
+  - A squashed commit, a release commit, or a commit with several topics gets one line per topic (none if the
+    summary says it all), with a blank line between topics and no bullets.
+  - Wrap lines at 72 characters.
+- **No AI attribution:** no `Co-Authored-By: Claude` trailer, no `Claude-Session:` line, or any other AI attribution
+  line.
+- Dependabot's own commits and GitHub's merge commits (`Merge pull request #N …`) are exempt.
+
 ## Decisions
 
 The owner makes every decision: review rulings, skipped findings, accepted limits, deferrals and plan changes. A
