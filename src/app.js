@@ -4824,6 +4824,16 @@ async function onKeydown(event) {
   )
     event.preventDefault();
 
+  // Quits every window, as Cmd+Q does on the Mac — hence before the modal
+  // guard, so a dialog open doesn't hold it. Not on the Mac itself: the page
+  // sees the key before the menu does, so both would fire. Spelled as the
+  // reload's, with no Shift so Ctrl+Shift+Q stays free.
+  if (!isMac && ctrl && !event.altKey && !event.shiftKey && (k === "q" || event.keyCode === 81)) {
+    event.preventDefault();
+    invoke("quit_app").catch(console.error);
+    return;
+  }
+
   // Otherwise a dialog is modal: let it own the keyboard, Escape included —
   // but not WebView2's Back and Forward, which would walk the `#id` history
   // under it.

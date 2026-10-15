@@ -1572,6 +1572,27 @@ fn offer_session(state: &AppState, session: session::Session) {
     }
 }
 
+/// Quit the app: every window, each asked for its last report first, as the
+/// macOS menu's Quit and Ctrl+Q on Windows and Linux both do.
+///
+/// Not blocking here: a menu event and a sync command both run on the main
+/// thread, and the answers arrive as commands on it. A second quit during the
+/// wait starts a second gather that ends in the same exit.
+fn quit(app: &AppHandle) {
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        session::gather(&app, "quit-requested").await;
+        app.exit(0);
+    });
+}
+
+/// Ctrl+Q on Windows and Linux, which have no menu to carry it; macOS keeps
+/// its menu's Quit.
+#[tauri::command]
+fn quit_app(app: AppHandle) {
+    quit(&app);
+}
+
 /// Menu ids for the two items that are our own rather than predefined.
 #[cfg(target_os = "macos")]
 const CLOSE_WINDOW: &str = "close-window";
@@ -1845,6 +1866,7 @@ fn main() {
             set_folder_sort,
             set_last_folder,
             reveal_path,
+            quit_app,
             update::check_for_update,
             update::install_update,
             update::set_auto_update_check,
@@ -1995,15 +2017,8 @@ fn main() {
                 }
             }
         }
-        // Not blocking here: this is the main thread, and the answers arrive
-        // as commands on it. A second Cmd+Q during the wait starts a second
-        // gather that ends in the same exit.
         if event.id().as_ref() == QUIT {
-            let app = app.clone();
-            tauri::async_runtime::spawn(async move {
-                session::gather(&app, "quit-requested").await;
-                app.exit(0);
-            });
+            quit(app);
         }
     });
 

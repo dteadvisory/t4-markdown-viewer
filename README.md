@@ -248,6 +248,7 @@ On macOS, read `Cmd` for every `Ctrl` below.
 | `F5` / `Ctrl+R` | Re-read the current file, keeping your scroll position |
 | `F8` | Next theme (`Shift+F8` for previous) |
 | `Ctrl+,` | Settings |
+| `Ctrl+Q` | Quit — every window, each sending where it stands first |
 | `Ctrl++` / `Ctrl+-` / `Ctrl+0` | Zoom in / out / fit — while a picture or a diagram is open |
 | `Enter` / `Space` | Open the focused diagram (full window) or picture (its own tab) |
 
@@ -355,8 +356,8 @@ disappearing from under you is a worse surprise than an empty one.
 
 Which windows are open, where they stand, what each has in its tabs and how far
 down each document you are: all of it goes to `session.json`, beside
-`config.json`, **as you work** rather than at quit. Closing a window, or
-**Quit** from the menu on macOS, sends the last moment first. Anything that
+`config.json`, **as you work** rather than at quit. Closing a window,
+`Ctrl+Q`, or **Quit** from the menu on macOS, sends the last moment first. Anything that
 gives the app no warning (a crash, a power cut, a `taskkill /F`, a shutdown, or
 a Quit from the Dock or the app switcher) costs only what changed since things
 last stood still for half a second.
