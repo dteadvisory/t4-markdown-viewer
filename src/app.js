@@ -31,6 +31,7 @@ const els = {
   sidebarNameText: document.getElementById("sidebar-name-text"),
   sidebarSort: document.getElementById("sidebar-sort"),
   sidebarClose: document.getElementById("sidebar-close"),
+  sidebarGrip: document.getElementById("sidebar-grip"),
   treeFilter: document.getElementById("tree-filter"),
   tree: document.getElementById("tree"),
   treeMenu: document.getElementById("tree-menu"),
@@ -1931,10 +1932,46 @@ async function showImage(asset, entry, token) {
  */
 function onResize() {
   measureBar();
+  announceSidebarWidth(); // a narrower window can clamp the sidebar too
   if (zoomed) zoomDiagram(zoomed.scale);
   if (!picture) return;
   const scale = picture.base ? picture.width / picture.base : 1;
   zoomTo(picture.fit ? defaultWidth() : scale * baseWidth());
+}
+
+/**
+ * The sidebar's grip sets `--sidebar-w`, or drops it (null) for the
+ * stylesheet's width. The CSS clamps it, and the clamped width is written
+ * back: a drag past the cap left as dragged would grow the sidebar again on a
+ * window widened later.
+ */
+function sizeSidebar(px) {
+  if (px === null) els.sidebar.style.removeProperty("--sidebar-w");
+  else {
+    els.sidebar.style.setProperty("--sidebar-w", `${px}px`);
+    els.sidebar.style.setProperty("--sidebar-w", `${els.sidebar.offsetWidth}px`);
+  }
+  onResize(); // the panel changed, as on a window resize
+}
+
+/**
+ * The range is the stylesheet's clamp, in px: ARIA's default of 0–100 would
+ * be overrun, and a reader that speaks a percentage should hear 0 and 100 at
+ * the two ends.
+ */
+function announceSidebarWidth() {
+  const min = 10 * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  els.sidebarGrip.setAttribute("aria-valuemin", min);
+  els.sidebarGrip.setAttribute("aria-valuemax", Math.max(min, window.innerWidth / 2));
+  els.sidebarGrip.setAttribute("aria-valuenow", els.sidebar.offsetWidth);
+}
+
+/** Where in the grip the drag took hold, so the edge doesn't jump to the pointer. */
+let sidebarGrab = 0;
+
+/** One width for every window, as the sort is; 0 for the stylesheet's. */
+function saveSidebarWidth(width = els.sidebar.offsetWidth) {
+  invoke("set_sidebar_width", { width }).catch(console.error);
 }
 
 /** Render whatever the active tab points at. `scrollY` overrides the saved spot. */
@@ -2699,6 +2736,7 @@ async function openFolder(
   }
   const { folder: was, picked: wasPicked, filter: wasFilter } = before;
   els.sidebar.hidden = false;
+  announceSidebarWidth(); // for a reader browsing to the grip, not only tabbing
   els.treeFilter.value = filter;
   // Onto the tab before the listing, not after it: a switch away while it is
   // out would otherwise lose what the reader just picked.
@@ -5045,6 +5083,36 @@ async function main() {
   els.sidebarClose.addEventListener("click", closeFolder);
   els.sidebarName.addEventListener("click", chooseFolder);
   els.sidebarSort.addEventListener("click", () => showSortMenu());
+  // Capture keeps the drag on the grip once the pointer leaves its 6px, and
+  // `preventDefault` keeps the press from starting a text selection. A
+  // pointerup releases the capture itself, so `lostpointercapture` is the one
+  // end of a drag, however it ends.
+  els.sidebarGrip.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    els.sidebarGrip.setPointerCapture(e.pointerId);
+    document.documentElement.classList.add("resizing-sidebar");
+    sidebarGrab = e.clientX - els.sidebar.getBoundingClientRect().right;
+  });
+  els.sidebarGrip.addEventListener("pointermove", (e) => {
+    if (els.sidebarGrip.hasPointerCapture(e.pointerId)) {
+      sizeSidebar(e.clientX - sidebarGrab - els.sidebar.getBoundingClientRect().left);
+    }
+  });
+  els.sidebarGrip.addEventListener("lostpointercapture", () => {
+    document.documentElement.classList.remove("resizing-sidebar");
+    saveSidebarWidth();
+  });
+  // Unmodified only: Alt+← is Back, and goes on to `onKeydown`.
+  els.sidebarGrip.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const step = { ArrowLeft: -16, ArrowRight: 16 }[e.key];
+    if (step === undefined && e.key !== "Home") return;
+    e.preventDefault(); // Home would scroll the page
+    sizeSidebar(step === undefined ? null : els.sidebar.offsetWidth + step);
+    saveSidebarWidth(step === undefined ? 0 : undefined);
+  });
+  els.sidebarGrip.addEventListener("focus", announceSidebarWidth);
   els.sortMenu.addEventListener("click", (e) => {
     const item = e.target.closest("button[data-sort]");
     if (!item) return;
@@ -5376,6 +5444,7 @@ async function main() {
   // order the reader last chose rather than sorted twice.
   // The file is the user's to edit, and the menu ticks one of exactly two rows.
   state.folderSort = settings.folder_sort === "modified" ? "modified" : "name";
+  if (settings.sidebar_width > 0) els.sidebar.style.setProperty("--sidebar-w", `${settings.sidebar_width}px`);
   showOpenMode(settings.open_mode ?? "tab");
   showReopen(settings.reopen ?? "ask");
   showDiagramColours(settings.diagram_colours === "mermaid" ? "mermaid" : "theme");

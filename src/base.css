@@ -468,7 +468,9 @@ main:has(#content:not([hidden]))::before {
 
 #sidebar {
   flex: none;
-  width: 16rem;
+  /* `--sidebar-w` is what the grip was dragged to; the clamp keeps it sane on a
+     window narrowed since. */
+  width: clamp(10rem, var(--sidebar-w, 16rem), 50vw);
   position: sticky;
   top: var(--bar-h, 0px);
   height: calc(100dvh - var(--bar-h, 0px));
@@ -480,6 +482,33 @@ main:has(#content:not([hidden]))::before {
 }
 
 #sidebar[hidden] {
+  display: none;
+}
+
+/* Over the sidebar's border and the edge of main's padding, margins netting 0
+   so main doesn't move — not over the sidebar's scrollbar, which sits at its
+   right edge on Windows and Linux. Above main's fade band (5), below the bar
+   (10) and the menus (20). */
+#sidebar-grip {
+  flex: none;
+  width: 6px;
+  margin: 0 -5px 0 -1px;
+  position: sticky;
+  top: var(--bar-h, 0px);
+  height: calc(100dvh - var(--bar-h, 0px));
+  z-index: 6;
+  cursor: col-resize;
+  background: transparent;
+}
+
+#sidebar-grip:hover,
+#sidebar-grip:focus-visible,
+html.resizing-sidebar #sidebar-grip {
+  outline: none;
+  background: var(--ui-accent);
+}
+
+#sidebar[hidden] + #sidebar-grip {
   display: none;
 }
 
@@ -1214,6 +1243,14 @@ html.dragging-tab * {
   cursor: grabbing !important;
 }
 
+/* The same for the sidebar's grip, and nothing selects under the drag. */
+html.resizing-sidebar,
+html.resizing-sidebar * {
+  cursor: col-resize !important;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* Stands in for the strip when only one document is open. */
 #doc-name.handle {
   cursor: grab;
@@ -1267,11 +1304,11 @@ html.dragging-tab * {
 /* A folder on show means the way in is the sidebar, not the open buttons —
    unless its listing failed or came back empty (`data-tree`, set by
    renderTree and reset by openFolder). */
-#sidebar[hidden] + main .empty-browse,
-#sidebar:not([hidden]) + main .empty-start,
-#sidebar:not([data-tree="empty"]) + main .hint-empty,
-#sidebar:not([data-tree="error"]) + main .hint-error,
-#sidebar:is([data-tree="empty"], [data-tree="error"]) + main .hint-pick {
+#sidebar[hidden] ~ main .empty-browse,
+#sidebar:not([hidden]) ~ main .empty-start,
+#sidebar:not([data-tree="empty"]) ~ main .hint-empty,
+#sidebar:not([data-tree="error"]) ~ main .hint-error,
+#sidebar:is([data-tree="empty"], [data-tree="error"]) ~ main .hint-pick {
   display: none;
 }
 

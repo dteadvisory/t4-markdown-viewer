@@ -1347,6 +1347,15 @@ fn set_folder_sort(sort: String) {
     config::save(&cfg);
 }
 
+/// Not broadcast, like the sort: another window keeps its width until it is
+/// launched again.
+#[tauri::command]
+fn set_sidebar_width(width: u32) {
+    let mut cfg = config::load();
+    cfg.sidebar_width = width;
+    config::save(&cfg);
+}
+
 #[tauri::command]
 fn set_last_folder(path: String) {
     let mut cfg = config::load();
@@ -1864,6 +1873,7 @@ fn main() {
             restore_offered_session,
             picker_dir,
             set_folder_sort,
+            set_sidebar_width,
             set_last_folder,
             reveal_path,
             quit_app,

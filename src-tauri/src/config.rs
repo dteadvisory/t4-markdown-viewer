@@ -89,6 +89,9 @@ pub struct Config {
     /// anything else by name. One setting for every folder, because the
     /// question people ask of a list is about the list, not about where it is.
     pub folder_sort: String,
+    /// The sidebar's width in px, as last dragged; 0 for the stylesheet's
+    /// default. One width for every window, as `folder_sort` is one order.
+    pub sidebar_width: u32,
     /// Whose colours diagrams are drawn in — see `DEFAULT_DIAGRAM_COLOURS`.
     pub diagram_colours: String,
     /// The font for the document's text, over every theme's; empty for the
@@ -105,6 +108,7 @@ impl Default for Config {
             last_folder: String::new(),
             reopen: DEFAULT_REOPEN.to_string(),
             folder_sort: "name".to_string(),
+            sidebar_width: 0,
             diagram_colours: DEFAULT_DIAGRAM_COLOURS.to_string(),
             doc_font: DEFAULT_DOC_FONT.to_string(),
         }
@@ -311,6 +315,16 @@ mod tests {
         assert_eq!(c.theme, "dracula");
         assert_eq!(c.reopen, "restore");
         assert_eq!(c.folder_sort, "name");
+    }
+
+    /// And for `sidebar_width`: a config from before the sidebar could be
+    /// resized keeps the stylesheet's width.
+    #[test]
+    fn config_without_sidebar_width_still_loads() {
+        let c: Config =
+            serde_json::from_str(r#"{"theme":"dracula","folder_sort":"modified"}"#).unwrap();
+        assert_eq!(c.folder_sort, "modified");
+        assert_eq!(c.sidebar_width, 0);
     }
 
     #[test]

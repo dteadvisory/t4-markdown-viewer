@@ -33,6 +33,7 @@ Electron build starts around 150 MB.
   The box above the tree narrows it to names containing what you type,
   across every folder it has listed so far. The sort button beside the close
   button orders the files by name or by date modified, newest first.
+  Drag the sidebar's edge to resize it; the width is kept.
 - **Tabs or windows.** Read several documents at once, and choose per taste
   whether an opened file lands in a new tab or its own window. Tabs drag to
   reorder, and out onto the desktop to become their own window. Dragging one
