@@ -131,6 +131,12 @@ P=$($PT '.tree-row[data-path$="second.md"]'); A=$(echo "$P" | python3 -c "import
 [[ $(front <pid>) == true ]] && osascript -l JavaScript $M click "$A" cmd
 ```
 
+`front` can fail and keep failing: on macOS 26.7 (2026-10-15) neither System
+Events nor `NSRunningApplication.activate` would bring the app forward, though
+it stayed responsive. A real click on the window's title bar (`macmouse.js
+click`) did. When `front` prints false, click the title bar and check again;
+never send the key anyway.
+
 All of these were measured to work:
 
 - **Real clicks** (`isTrusted`, `pointerdown` … `click`): a copy button fills

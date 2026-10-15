@@ -122,11 +122,13 @@ user gesture: clipboard writes, and anything that opens a native dialog.
 `Input.dispatchMouseEvent` counts as one; a scripted `.click()` may not.
 
 Check visibility through computed style, not `hidden` alone. Much of the UI is
-shown by CSS selectors (e.g. `#sidebar[data-tree="empty"] + main .hint-empty`):
+shown by CSS selectors (e.g. `#sidebar[data-tree="empty"] ~ main .hint-empty`).
+`checkVisibility()` covers an ancestor hidden by CSS too; a check of the
+element's own `display` and `[hidden]` ancestors called `.hint-error` visible
+inside a hidden `.empty-browse`:
 
 ```js
-const v = (s) => { const e = document.querySelector(s);
-  return !!e && getComputedStyle(e).display !== "none" && !e.closest("[hidden]"); };
+const v = (s) => !!document.querySelector(s)?.checkVisibility();
 ```
 
 Read every screenshot you take. For theme work, also measure: loop
