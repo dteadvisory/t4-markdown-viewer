@@ -1,7 +1,8 @@
 # Ctrl+Q to Quit, and a Resizable Sidebar Plan
 
-> **Status (2026-10-15):** built and walked on all three platforms; change review and triage
-> done. Awaiting packaging.
+> **Status (2026-10-15):** executed in full, walked on all three platforms, change review and
+> triage done; shipped in 1.8.5 as 410a384 (Ctrl+Q) and a7ef2c6 (sidebar). Paths below are as
+> they stood when it was written.
 
 **Spec:** the owner, 2026-10-15: "I want to implement a quit shortcut like cmd+q for windows and
 linux. use ctrl+q like git-ui. also, I want the folder sidebar to be resizable".

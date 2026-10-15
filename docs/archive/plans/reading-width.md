@@ -1,5 +1,7 @@
 # Reading Width and Line Spacing Plan
 
+> **Filed (2026-10-15):** what this plan kept shipped in 1.8.1, in a8276c3 with the centred column.
+>
 > **Status (2026-10-11):** executed, then superseded in part by
 > `reading-width-centred.md`: the left-aligned per-element cap gave way to a centred column.
 > Kept from here: line-height 1.7, `--measure: 75ch`, diagrams at their natural width (C2'),

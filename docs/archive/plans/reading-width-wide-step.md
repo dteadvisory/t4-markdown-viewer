@@ -1,5 +1,7 @@
 # Wider Reading Column in Wide Windows Plan
 
+> **Filed (2026-10-15):** shipped in 1.8.1 as 6d1cc1b.
+>
 > **Status (2026-10-11):** executed on the owner's go (Task 1, `c22e795`) and verified on all
 > three engines (Task 2); owner rulings Q1-Q3 recorded. Tried first as a live, uncommitted
 > trial on the owner's PC (WebView2 only, injected over DevTools) and approved by eye ("looks
@@ -9,7 +11,7 @@
 **Goal:** in a wide window the reading column widens one step, from 75ch to 100ch, so the
 margins don't swallow the page. Below the switch nothing changes.
 
-**Builds on** `docs/plans/reading-width-centred.md` (the centred column, on main as `a8276c3`,
+**Builds on** `docs/archive/plans/reading-width-centred.md` (the centred column, on main as `a8276c3`,
 pushed, not released).
 
 **Spec:** the owner, 2026-10-11, with the centred build open: "can we make a 2 step cap? when

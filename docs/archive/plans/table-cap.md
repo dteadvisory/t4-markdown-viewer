@@ -1,5 +1,8 @@
 # Wide Tables Capped at the Wide Measure, and the Toolbar Order Plan
 
+> **Filed (2026-10-15):** both parts executed; shipped in 1.8.2 as 5a8dc56 (tables) and
+> b7081ec (toolbar). The status below is as it stood before the go.
+>
 > **Status (2026-10-11):** final after the review loop; owner rulings R2 and R4 and the
 > toolbar order recorded. Part 1 (tables) was built first as an uncommitted preview on the
 > owner's PC (WebView2 only) and approved by eye ("looks good"); its diff is still uncommitted
@@ -11,7 +14,7 @@ its cells, instead of spreading to the window's edge. It goes wider only when it
 can't fit 100ch even at their narrowest, and a column of longer text has a 12ch floor so it
 never squeezes to a word a line. Narrow tables don't change.
 
-**Builds on** `docs/plans/reading-width-wide-step.md` (`--measure-wide`, shipped in 1.8.1).
+**Builds on** `docs/archive/plans/reading-width-wide-step.md` (`--measure-wide`, shipped in 1.8.1).
 
 **Spec:** the owner, 2026-10-11: "let's cap it at 100ch too but let it go wider when the
 columns dont fit and are at their min width already, what can you suggest for a min width to

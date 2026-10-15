@@ -212,7 +212,7 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   readable; kept by the owner. A fix to start from: `font-size-adjust` on `#content` set to the
   theme font's own x-height ratio (support on WebKitGTK unverified). Reopen if Libron or another
   chosen font reads too small or large at the themes' sizes, or on a report about Tufte.
-  The reading width (`plans/reading-width.md`) is 75ch of the document font (100ch in a wide
+  The reading width (`archive/plans/reading-width.md`) is 75ch of the document font (100ch in a wide
   window), so a size change keeps the line length and moves the edge with it.
 - [ ] **On macOS, Option+Left/Right in the tree filter and the find bar goes Back/Forward, not a
   word** (added 2026-10-09, `archive/plans/find-in-document.md`, ruling G). The app's Back/Forward
@@ -227,7 +227,7 @@ The next three came out of the session-restore walks (`archive/plans/session-res
   (fold buttons, spans per value). Reopen on a report of a JSON file exhausting memory or
   freezing, or with the next JSON viewer work.
 - [ ] **In a narrow window a wide diagram shrinks until its labels can't be read** (added
-  2026-10-11, the reading-width walks, `plans/reading-width.md`). At ~700 px a 10-node `LR`
+  2026-10-11, the reading-width walks, `archive/plans/reading-width.md`). At ~700 px a 10-node `LR`
   flowchart (natural ~2 240 px) is scaled to the ~610 px column on all three engines, and it
   doesn't scroll in its box. It did the same before the reading width: mermaid's `width="100%"`
   shrank it too. The zoom view shows it full size. A fix to start from: a smallest readable
@@ -363,7 +363,7 @@ as it is found.
   the find field (cause unmeasured). Linux: none at 409 000 nodes.
   *Accepted 2026-10-10. Reopen on a report of typing lag on large documents.*
 - [ ] **Wide content nested in a list sits off-centre** (added 2026-10-11,
-  `plans/reading-width-centred.md` M1). A table, diagram or picture wider than the reading column
+  `archive/plans/reading-width-centred.md` M1). A table, diagram or picture wider than the reading column
   is centred on its own box, so inside a list item or quote it is centred on that item, shifted by
   half the indents: three levels deep, a pane-wide table sat 42 px right of centre at 1600 px
   (Windows, Linux; the Mac 91 px left against 7 right at 1512). In a narrow window its box can
@@ -373,7 +373,7 @@ as it is found.
   *Accepted 2026-10-11. Reopen on a report of nested wide content looking off-centre or cut, or
   with the next layout work.*
 - [ ] **A command in an unlabelled code block scrolls instead of wrapping** (added 2026-10-11,
-  `plans/reading-width-centred.md` M2). Only blocks in a shell language (`sh`, `bash`, `shell`,
+  `archive/plans/reading-width-centred.md` M2). Only blocks in a shell language (`sh`, `bash`, `shell`,
   `zsh`, `fish`, `console`, `shellsession`, `powershell`, `ps1`, `pwsh`, `cmd`, `bat`, `batch`)
   wrap with a hanging indent; a bare fence or ` ```text ` scrolls like program code. Guessing
   from the text (a `$ ` prompt) would misfire on some program code.
@@ -394,7 +394,7 @@ as it is found.
   *Accepted 2026-10-11. Reopen on a report of a slow page with a long log, or with the next
   performance work.*
 - [ ] **A table column's floor is judged by character count** (added 2026-10-11,
-  `plans/table-cap.md`). A column gets its 12ch floor when a cell has more than 14 characters,
+  `archive/plans/table-cap.md`). A column gets its 12ch floor when a cell has more than 14 characters,
   standing in for "would this column wrap". Characters about 2ch wide, as in Chinese, Japanese
   or Korean, which can also break between any two, are undercounted: a column of 8-character
   phrases (about 16ch) gets no floor and could squeeze to a character a line in a crowded
@@ -403,7 +403,7 @@ as it is found.
   *Accepted 2026-10-11. Reopen on a report of a squeezed column in CJK or other non-Latin text,
   or a request to support such documents.*
 - [ ] **A table written in HTML gets no column floors** (added 2026-10-11,
-  `plans/table-cap.md`, ruling R2). With no `<th>` header row the floor class lands on a `<td>`
+  `archive/plans/table-cap.md`, ruling R2). With no `<th>` header row the floor class lands on a `<td>`
   the CSS doesn't match, and a `colspan` makes the floor check count columns wrong. Such a
   table is still capped at 100ch, its columns shrinking to their longest word. Markdown tables
   always have a header row and no spans.

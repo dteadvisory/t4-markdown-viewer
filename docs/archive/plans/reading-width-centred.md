@@ -1,5 +1,8 @@
 # Centred Reading Column Plan
 
+> **Filed (2026-10-15):** executed; shipped in 1.8.1 as a8276c3. The status below is as it
+> stood before the go.
+>
 > **Status (2026-10-11):** draft for the owner's review. Built first as an uncommitted preview
 > on the owner's PC (WebView2 only) and approved by eye ("previews look good"). Owner rulings
 > recorded: E1-E11, Q1-Q2 (each the recommended option), M1 (clip). Probes P4-P6 run on all
@@ -12,7 +15,7 @@ centred on the same middle line, up to the window's width. Code stays in the col
 wrap with a hanging indent, other code scrolls. The diagram view gets a close button you can
 find, and loses the document's scrollbar beside it.
 
-**Builds on** `docs/plans/reading-width.md` (the left-aligned version, committed on main as
+**Builds on** `docs/archive/plans/reading-width.md` (the left-aligned version, committed on main as
 `9ab7abb`, not pushed or released). Kept from it: line-height 1.7, `--measure: 75ch`, each
 diagram drawn at its natural px width (C2'), the JSON view at full width (C5). Replaced: the
 per-element cap with its `:has()` exceptions, `fit-content` on code blocks and diagrams, and
@@ -307,7 +310,7 @@ pass on all three.
   centred, kept as Q2 working (no record); the Windows re-layout timing and a long command
   block's unmeasured cost accepted with reopen triggers; the Mac's image-viewer focus ring
   deferred.
-- [x] `docs/plans/reading-width.md`'s status: superseded in part by this plan.
+- [x] `docs/archive/plans/reading-width.md`'s status: superseded in part by this plan.
 
 ## Review Focus
 
