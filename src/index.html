@@ -3,8 +3,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Markdown Viewer</title>
+    <title>T4 Notes</title>
     <link rel="stylesheet" href="base.css" />
+    <link rel="stylesheet" href="notes.css" />
     <!-- Active theme CSS is injected here at runtime. -->
     <style id="theme"></style>
   </head>
@@ -40,6 +41,14 @@
         <div id="controls">
           <!-- Unhidden only once a check has found a newer release. -->
           <button id="update-btn" type="button" hidden title="A new version is available">Update</button>
+
+          <!-- T4 Notes: edit the document, and keep notes on it for Claude. -->
+          <button id="edit-btn" class="nav" type="button" title="Edit this document (Ctrl+E)" aria-label="Edit" aria-pressed="false" disabled>
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z M9 4l3 3" /></svg>
+          </button>
+          <button id="notes-btn" class="nav" type="button" title="Notes for Claude (Ctrl+Shift+M)" aria-label="Notes for Claude" aria-pressed="false">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7.5h-6l-3 2.5v-2.5h-2z M5 6.5h6 M5 8.5h4" /></svg>
+          </button>
 
           <!-- Switches between the light and dark member of the theme family
                that is selected. The icon is the side being switched *to*. -->
@@ -101,6 +110,16 @@
       <!-- Outside the sidebar: inside it, the grip would scroll away with the tree. -->
       <div id="sidebar-grip" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" tabindex="0"></div>
 
+      <!-- T4 Notes: the document's own text, with the page beside it as a live preview. -->
+      <section id="editor" hidden>
+        <div id="editor-head">
+          <span id="editor-status" role="status"></span>
+          <button id="editor-save" type="button" title="Save (Ctrl+S)">Save</button>
+          <button id="editor-done" type="button" title="Back to reading (Ctrl+E)">Done</button>
+        </div>
+        <textarea id="editor-text" spellcheck="true" aria-label="Document text"></textarea>
+      </section>
+
     <main>
       <article class="markdown-body" id="content" hidden></article>
 
@@ -122,8 +141,8 @@
 
       <section id="empty">
         <div class="empty-start">
-          <h1>Markdown Viewer</h1>
-          <p>Open a Markdown file or a folder, or associate <code>.md</code> files with this app and double-click one.</p>
+          <h1>T4 Notes</h1>
+          <p>Open a Markdown file or a folder, or associate <code>.md</code> files with this app and double-click one. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> to write notes for Claude.</p>
           <button id="empty-open-btn" type="button"><svg aria-hidden="true"><use href="#icon-file" /></svg>Open a file…</button>
           <button id="empty-folder-btn" type="button"><svg aria-hidden="true"><use href="#icon-folder" /></svg>Open a folder…</button>
         </div>
@@ -146,7 +165,38 @@
         <p id="error-detail"></p>
       </section>
     </main>
+
+      <!-- T4 Notes: notes on what is being read, copied out as one block for Claude. -->
+      <aside id="notes" hidden aria-label="Notes for Claude">
+        <div id="notes-head">
+          <h2>Notes for Claude</h2>
+          <button id="notes-close" class="nav" type="button" title="Hide notes (Ctrl+Shift+M)" aria-label="Hide notes">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4 L12 12 M12 4 L4 12" /></svg>
+          </button>
+        </div>
+        <p id="notes-for" class="notes-hint"></p>
+        <textarea id="notes-general" placeholder="General notes…" aria-label="General notes"></textarea>
+        <p class="notes-hint">Select text in the document, then <b>Add Note</b> (Ctrl+M) to note on that passage.</p>
+        <ol id="notes-list"></ol>
+        <div id="notes-actions">
+          <button id="notes-copy" type="button" title="Copy all notes (Ctrl+Shift+C)">Copy For Claude</button>
+          <button id="notes-clear" type="button" class="minor">Clear</button>
+        </div>
+      </aside>
     </div>
+
+    <!-- Floats beside a selection in the document. -->
+    <button id="note-pop" type="button" hidden>Add Note</button>
+
+    <!-- A question with a few answers: unsaved edits, a file changed on disk,
+         clearing notes. notes.js fills in the words and the buttons. -->
+    <dialog id="choice-dialog" aria-labelledby="choice-title">
+      <form method="dialog">
+        <h2 id="choice-title"></h2>
+        <p id="choice-text"></p>
+        <div id="choice-actions"></div>
+      </form>
+    </dialog>
 
     <div id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -182,7 +232,8 @@
         </div>
 
         <div id="settings-general" role="tabpanel" aria-labelledby="settings-tab-general">
-          <fieldset>
+          <!-- T4 Notes is built from source, so the original's updater stays off. -->
+          <fieldset hidden>
             <legend>Updates</legend>
             <p class="hint">
               Asks GitHub once per launch whether there is a newer version. Nothing is downloaded or
@@ -313,5 +364,6 @@
 
     <script src="vendor/highlight.min.js"></script>
     <script src="app.js"></script>
+    <script src="notes.js"></script>
   </body>
 </html>

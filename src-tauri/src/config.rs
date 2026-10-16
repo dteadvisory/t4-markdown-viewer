@@ -135,12 +135,12 @@ pub fn start_dir(candidate: &str, saved: &str) -> String {
         .unwrap_or_default()
 }
 
-/// `%APPDATA%\t4-markdown-viewer`
+/// `%APPDATA%\t4-notes`
 #[cfg(not(test))]
 pub fn dir() -> PathBuf {
     dirs::config_dir()
         .unwrap_or_else(|| PathBuf::from("."))
-        .join("t4-markdown-viewer")
+        .join("t4-notes")
 }
 
 /// Never the reader's own folder under test: each thread gets a temp folder of

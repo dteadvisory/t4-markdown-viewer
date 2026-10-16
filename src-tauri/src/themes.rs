@@ -30,7 +30,7 @@ pub struct ThemeInfo {
     pub mode: Mode,
 }
 
-/// User-authored themes: `%APPDATA%\t4-markdown-viewer\themes`
+/// User-authored themes: `%APPDATA%\t4-notes\themes`
 pub fn user_dir() -> PathBuf {
     config::dir().join("themes")
 }

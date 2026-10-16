@@ -780,6 +780,78 @@ fn section_source(path: String, line: usize, stamp: String) -> Result<String, St
     render::section(&render::decode(&bytes), line)
 }
 
+/// A document's own text, for the editor (T4 Notes). Line endings come back as
+/// `\n` with a note of what the file used, so the save can put them back.
+#[derive(Serialize)]
+struct Source {
+    text: String,
+    stamp: String,
+    bom: bool,
+    crlf: bool,
+}
+
+/// Refused unless the file is valid UTF-8: saving a repaired decode would
+/// overwrite the bytes it could not read.
+#[tauri::command(async)]
+fn read_source(path: String) -> Result<Source, String> {
+    let (path, _) = locate(path)?;
+    check_size(&path, MAX_MARKDOWN_BYTES)?;
+    let shown = strip_unc(&path);
+    let bytes = std::fs::read(&path).map_err(|e| format!("{shown}: {e}"))?;
+    let stamp = stamp_of(&bytes);
+    let (bom, body) = match bytes.strip_prefix(render::BOM) {
+        Some(b) => (true, b),
+        None => (false, &bytes[..]),
+    };
+    let text = std::str::from_utf8(body)
+        .map_err(|_| format!("{shown}: not UTF-8, so it can't be edited safely"))?;
+    Ok(Source {
+        text: text.replace("\r\n", "\n"),
+        stamp,
+        bom,
+        crlf: text.contains("\r\n"),
+    })
+}
+
+/// What `save_source` answers when the file is no longer the one the editor read.
+const CHANGED_ON_DISK: &str = "changed-on-disk";
+
+/// Write the editor's text back. Refused with `CHANGED_ON_DISK` if the file
+/// changed since `stamp` was read, unless `force`. Returns the new stamp.
+#[tauri::command(async)]
+fn save_source(
+    path: String,
+    text: String,
+    stamp: String,
+    bom: bool,
+    crlf: bool,
+    force: bool,
+) -> Result<String, String> {
+    let (path, _) = locate(path)?;
+    let shown = strip_unc(&path);
+    if !force {
+        let now = std::fs::read(&path).map_err(|e| format!("{shown}: {e}"))?;
+        if stamp_of(&now) != stamp {
+            return Err(CHANGED_ON_DISK.into());
+        }
+    }
+    let text = text.replace("\r\n", "\n");
+    let body = if crlf { text.replace('\n', "\r\n") } else { text };
+    let mut bytes = Vec::with_capacity(body.len() + 3);
+    if bom {
+        bytes.extend_from_slice(render::BOM);
+    }
+    bytes.extend_from_slice(body.as_bytes());
+    std::fs::write(&path, &bytes).map_err(|e| format!("{shown}: {e}"))?;
+    Ok(stamp_of(&bytes))
+}
+
+/// The editor's live preview: the same render a saved file gets.
+#[tauri::command(async)]
+fn render_text(text: String) -> Result<String, String> {
+    render::render_titled(&text).map(|(html, _)| html)
+}
+
 /// The next chunk of a large JSON document, for the `… more` button `json.rs`
 /// left at the end of the last one.
 ///
@@ -1851,6 +1923,9 @@ fn main() {
             load_file,
             toggle_task,
             section_source,
+            read_source,
+            save_source,
+            render_text,
             json_region,
             load_asset,
             list_dir,

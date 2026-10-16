@@ -1983,6 +1983,7 @@ async function showActive(scrollY) {
   if (!tab) {
     shownToken = token;
     show("empty");
+    editorAfterShow();
     updateChrome();
     followTab(null);
     return;
@@ -2060,6 +2061,9 @@ async function showActive(scrollY) {
     show("error");
   }
   shownToken = token;
+  // T4 Notes: an open editor keeps its own text on the page, or closes if
+  // the tab has moved on to another document.
+  await editorAfterShow();
   syncWatch();
   updateChrome();
   // After the load, not before: `tab.dir` is canonical by now, and a render a
@@ -2078,9 +2082,11 @@ function updateChrome() {
   els.docName.classList.toggle("handle", tabs.length === 1);
   markTreeSelection();
   appWindow
-    .setTitle(tab ? `${tab.label} — Markdown Viewer` : "Markdown Viewer")
+    .setTitle(tab ? `${tab.label} — T4 Notes` : "T4 Notes")
     .catch(() => {});
   renderTabs();
+  // T4 Notes: the edit button and the notes panel follow the active tab.
+  notesAfterChrome();
   // The funnel every tab change already reaches: opening, activating, closing
   // and navigating all end up here, so the saved session follows them without
   // each of them having to remember to say so. Without delay when it can be:
@@ -2291,6 +2297,8 @@ async function removeTab(id) {
  * a window vanishing under you is a worse surprise than an empty one.
  */
 async function closeTab(id) {
+  // T4 Notes: unsaved edits are asked about first, and Cancel keeps the tab.
+  if (!(await editorMayClose(id))) return;
   const gone = await removeTab(id);
   if (!gone) return;
   closedTabs.push(gone);
@@ -5472,7 +5480,10 @@ async function main() {
   await listenHere("file-changed", async (e) => {
     const changed = e.payload ?? [];
     const open = currentEntry(activeTab())?.path;
-    if (open && changed.some((c) => samePath(c, open))) {
+    // T4 Notes: a document being edited is the editor's to reload.
+    if (open && editorOwns(open)) {
+      if (changed.some((c) => samePath(c, open))) await editorDiskChanged();
+    } else if (open && changed.some((c) => samePath(c, open))) {
       // Re-render with the pictures the webview already holds, so the page has
       // its full height when the scroll is restored; new bytes go in below.
       await refresh();
@@ -5605,9 +5616,8 @@ async function main() {
   // does not answer in time keeps its last report.
   listen("quit-requested", () => reportSession()).catch(console.error);
 
-  // Last, and not awaited: the document is already on screen, and a slow or
-  // unreachable GitHub must cost the reader nothing.
-  checkUpdate(false).catch(console.error);
+  // T4 Notes is built from source: the original's update check would offer the
+  // original's installer, so it is not run.
 }
 
 main().catch((err) => {

@@ -1,8 +1,8 @@
 [package]
-name = "t4-markdown-viewer"
+name = "t4-notes"
 version = "1.8.5"
 edition = "2021"
-description = "A fast, themeable Markdown viewer"
+description = "T4 Markdown Viewer with editing and notes for Claude"
 authors = ["Christopher Montevirgen"]
 license = "MIT"
 repository = "https://github.com/toperux/t4-markdown-viewer"

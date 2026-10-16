@@ -18,9 +18,9 @@
 ; Must match bundle.fileAssociations[].name in tauri.conf.json. One ProgID per
 ; association, so Explorer's Type column does not call a .json file a Markdown
 ; document.
-!define T4_PROGID "T4MarkdownViewer.Document"
-!define T4_JSON_PROGID "T4MarkdownViewer.Json"
-!define T4_CAPKEY "Software\T4MarkdownViewer\Capabilities"
+!define T4_PROGID "T4Notes.Document"
+!define T4_JSON_PROGID "T4Notes.Json"
+!define T4_CAPKEY "Software\T4Notes\Capabilities"
 
 ; SHCNE_ASSOCCHANGED — tell Explorer to re-read associations so the change
 ; shows up without a sign-out.
@@ -85,7 +85,7 @@
 
   DeleteRegKey SHELL_CONTEXT "Software\Classes\Applications\${MAINBINARYNAME}.exe"
   DeleteRegValue SHELL_CONTEXT "Software\RegisteredApplications" "${PRODUCTNAME}"
-  DeleteRegKey SHELL_CONTEXT "Software\T4MarkdownViewer"
+  DeleteRegKey SHELL_CONTEXT "Software\T4Notes"
 
   System::Call 'shell32::SHChangeNotify(i ${T4_SHCNE_ASSOCCHANGED}, i 0, i 0, i 0)'
 
@@ -96,6 +96,6 @@
   ${If} $DeleteAppDataCheckboxState = 1
   ${AndIf} $UpdateMode <> 1
     SetShellVarContext current
-    RmDir /r "$APPDATA\t4-markdown-viewer"
+    RmDir /r "$APPDATA\t4-notes"
   ${EndIf}
 !macroend

@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "T4 Markdown Viewer",
-  "identifier": "com.montevirgen.t4-markdown-viewer",
+  "productName": "T4 Notes",
+  "identifier": "co.peterlow.t4-notes",
   "build": {
     "frontendDist": "../src"
   },
@@ -9,7 +9,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "Markdown Viewer",
+        "title": "T4 Notes",
         "width": 1100,
         "height": 860,
         "minWidth": 420,
@@ -32,7 +32,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDYwN0U2NjU3NzE4NDc1NTcKUldSWGRZUnhWMlorWUdOTmMzZzZQakQ4VHREZ0hyZ2FtOUcrcDJEa0tYRXNtOWY4NlNaS3VwbkoK",
       "endpoints": [
-        "https://github.com/toperux/t4-markdown-viewer/releases/latest/download/latest.json"
+        "https://github.com/dteadvisory/t4-markdown-viewer/releases/latest/download/latest.json"
       ],
       "windows": {
         "installMode": "passive"
@@ -43,7 +43,7 @@
     "active": true,
     "category": "Utility",
     "targets": ["nsis", "app", "dmg", "deb", "rpm", "appimage"],
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -53,18 +53,18 @@
     ],
     "resources": ["themes/*"],
     "shortDescription": "Markdown Viewer",
-    "longDescription": "A fast, themeable Markdown viewer.",
+    "longDescription": "A themeable Markdown viewer and editor with notes for Claude.",
     "fileAssociations": [
       {
         "ext": ["md", "markdown", "mdown", "mkd", "mdtext"],
-        "name": "T4MarkdownViewer.Document",
+        "name": "T4Notes.Document",
         "description": "Markdown Document",
         "role": "Viewer",
         "mimeType": "text/markdown"
       },
       {
         "ext": ["json", "jsonc"],
-        "name": "T4MarkdownViewer.Json",
+        "name": "T4Notes.Json",
         "description": "JSON Document",
         "role": "Viewer",
         "mimeType": "application/json"
