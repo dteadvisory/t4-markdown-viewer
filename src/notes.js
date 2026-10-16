@@ -20,6 +20,8 @@ const t4 = {
   editorStatus: document.getElementById("editor-status"),
   editorSave: document.getElementById("editor-save"),
   editorDone: document.getElementById("editor-done"),
+  editorCopy: document.getElementById("editor-copy"),
+  newNoteBtn: document.getElementById("new-note-btn"),
   editBtn: document.getElementById("edit-btn"),
   notesBtn: document.getElementById("notes-btn"),
   notes: document.getElementById("notes"),
@@ -134,7 +136,7 @@ function showEditorStatus() {
   els.docName.classList.toggle("dirty", dirty);
 }
 
-async function openEditor() {
+async function openEditor({ caretAtEnd = false } = {}) {
   if (editor.path !== null || !canEdit()) return;
   const path = currentEntry(activeTab()).path;
   const src = await invoke("read_source", { path });
@@ -155,8 +157,49 @@ async function openEditor() {
   showEditorStatus();
   if (editorDirty()) await renderPreview();
   t4.editorText.focus();
-  t4.editorText.setSelectionRange(0, 0);
-  t4.editorText.scrollTop = 0;
+  const at = caretAtEnd ? t4.editorText.value.length : 0;
+  t4.editorText.setSelectionRange(at, at);
+  t4.editorText.scrollTop = caretAtEnd ? t4.editorText.scrollHeight : 0;
+}
+
+/* ---------------- new notes ---------------- */
+
+/** A note file is one that lives in a folder called `Notes`. */
+function isNoteFile(path) {
+  return !!path && /[\\/]Notes[\\/][^\\/]+$/i.test(path);
+}
+
+function ordinal(n) {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/**
+ * Ctrl+Shift+N: a new, timestamped note file, saved where the reader picks
+ * (the last notes folder used, at first `DTE Advisory\Sessions\Notes`), and
+ * opened straight into the editor.
+ */
+async function newNote() {
+  const now = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  const name = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}${pad(now.getMinutes())}.md`;
+  const dir = readStore("noteDir", null) ?? (await invoke("default_note_dir"));
+  await invoke("ensure_dir", { path: dir }).catch(console.error);
+  const target = await window.__TAURI__.dialog.save({
+    title: "New note for Claude",
+    defaultPath: `${dir}\\${name}`,
+    filters: [{ name: "Markdown", extensions: ["md"] }],
+  });
+  if (!target) return;
+  writeStore("noteDir", dirName(target));
+  const month = now.toLocaleString("en-AU", { month: "long" });
+  const time = now.toLocaleString("en-AU", { hour: "numeric", minute: "2-digit", hour12: true }).replace(" ", "");
+  const heading = `# Note, ${ordinal(now.getDate())} ${month} ${now.getFullYear()}, ${time}\n\n`;
+  const path = await invoke("create_note", { path: target, text: heading });
+  if (editor.path !== null && !(await editorMayClose(activeId))) return;
+  await openTab(path);
+  await openEditor({ caretAtEnd: true });
 }
 
 /**
@@ -459,13 +502,26 @@ function addNote() {
   last?.scrollIntoView({ block: "nearest" });
 }
 
-/** All the notes on the document on screen, as one block to paste to Claude. */
-function notesText() {
+/**
+ * All the notes on the document on screen, as one block to paste to Claude.
+ * On a note file the note itself comes first, with where it is saved, so
+ * Claude can read, move or file it.
+ */
+async function notesText() {
   const tab = activeTab();
   const n = loadNotes();
   const items = n.items.filter((i) => i.quote || i.text?.trim());
-  if (!items.length && !n.general.trim()) return "";
   const out = [];
+  if (tab && isNoteFile(tab.path)) {
+    let body;
+    if (editor.path !== null && samePath(editor.path, tab.path)) body = t4.editorText.value;
+    else body = (await invoke("read_source", { path: tab.path })).text;
+    out.push(`My note, saved at: ${tab.path}`, "", body.trim(), "");
+    if (!items.length && !n.general.trim()) return out.join("\n").trim();
+    out.push("---", "");
+  } else if (!items.length && !n.general.trim()) {
+    return "";
+  }
   if (tab) out.push(`My notes on ${tab.label}`, tab.path, "");
   else out.push("My notes", "");
   items.forEach((item, i) => {
@@ -481,20 +537,29 @@ function notesText() {
   return out.join("\n").trim();
 }
 
-function copyNotes() {
-  const text = notesText();
+async function copyNotes() {
+  // A note being written is saved first, so the path handed over holds it.
+  const tab = activeTab();
+  if (tab && isNoteFile(tab.path) && editorDirty() && samePath(editor.path, tab.path)) {
+    if (!(await saveEditor())) return;
+  }
+  const text = await notesText();
   if (!text) {
     toast("No notes to copy yet.");
     return;
   }
-  // Inside the click or keypress itself, which the clipboard requires.
-  navigator.clipboard.writeText(text).then(
-    () => {
-      const count = loadNotes().items.length;
-      toast(`Copied ${count ? `${count} note${count === 1 ? "" : "s"}` : "your notes"}. Paste them to Claude.`);
-    },
-    (err) => toast(`Couldn’t copy: ${err}`),
-  );
+  // Still inside the click or keypress that asked: the clipboard requires it.
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    toast(`Couldn’t copy: ${err}`);
+    return;
+  }
+  if (tab && isNoteFile(tab.path)) toast("Copied your note and where it’s saved. Paste it to Claude.");
+  else {
+    const count = loadNotes().items.length;
+    toast(`Copied ${count ? `${count} note${count === 1 ? "" : "s"}` : "your notes"}. Paste them to Claude.`);
+  }
 }
 
 async function clearNotes() {
@@ -543,7 +608,9 @@ function onShortcut(e) {
   } else if (k === "m") {
     addNote();
   } else if (k === "c" && e.shiftKey) {
-    copyNotes();
+    copyNotes().catch(toast);
+  } else if (k === "n" && e.shiftKey) {
+    newNote().catch(toast);
   } else {
     handled = false;
   }
@@ -580,7 +647,9 @@ function notesMain() {
 
   t4.notesBtn.addEventListener("click", () => showNotes(t4.notes.hidden));
   t4.notesClose.addEventListener("click", () => showNotes(false));
-  t4.notesCopy.addEventListener("click", copyNotes);
+  t4.notesCopy.addEventListener("click", () => copyNotes().catch(toast));
+  t4.editorCopy.addEventListener("click", () => copyNotes().catch(toast));
+  t4.newNoteBtn.addEventListener("click", () => newNote().catch(toast));
   t4.notesClear.addEventListener("click", () => clearNotes().catch(toast));
   t4.notesGeneral.addEventListener("input", () => {
     const n = loadNotes();

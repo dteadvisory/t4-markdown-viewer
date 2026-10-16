@@ -42,7 +42,10 @@
           <!-- Unhidden only once a check has found a newer release. -->
           <button id="update-btn" type="button" hidden title="A new version is available">Update</button>
 
-          <!-- T4 Notes: edit the document, and keep notes on it for Claude. -->
+          <!-- T4 Notes: write a new note, edit the document, keep notes on it for Claude. -->
+          <button id="new-note-btn" class="nav" type="button" title="New note for Claude (Ctrl+Shift+N)" aria-label="New note">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 1.5h6L13 5v9.5h-9.5z M9.5 1.5V5H13 M8.25 7.5v4.5 M6 9.75h4.5" /></svg>
+          </button>
           <button id="edit-btn" class="nav" type="button" title="Edit this document (Ctrl+E)" aria-label="Edit" aria-pressed="false" disabled>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z M9 4l3 3" /></svg>
           </button>
@@ -114,6 +117,7 @@
       <section id="editor" hidden>
         <div id="editor-head">
           <span id="editor-status" role="status"></span>
+          <button id="editor-copy" type="button" class="minor" title="Copy this note and its location for Claude (Ctrl+Shift+C)">Copy For Claude</button>
           <button id="editor-save" type="button" title="Save (Ctrl+S)">Save</button>
           <button id="editor-done" type="button" title="Back to reading (Ctrl+E)">Done</button>
         </div>
@@ -142,7 +146,7 @@
       <section id="empty">
         <div class="empty-start">
           <h1>T4 Notes</h1>
-          <p>Open a Markdown file or a folder, or associate <code>.md</code> files with this app and double-click one. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> to write notes for Claude.</p>
+          <p>Open a Markdown file or a folder, or associate <code>.md</code> files with this app and double-click one. Press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>N</kbd> to write a new note for Claude.</p>
           <button id="empty-open-btn" type="button"><svg aria-hidden="true"><use href="#icon-file" /></svg>Open a file…</button>
           <button id="empty-folder-btn" type="button"><svg aria-hidden="true"><use href="#icon-folder" /></svg>Open a folder…</button>
         </div>

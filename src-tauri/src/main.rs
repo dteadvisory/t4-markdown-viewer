@@ -846,6 +846,43 @@ fn save_source(
     Ok(stamp_of(&bytes))
 }
 
+/// Make a folder for notes, so the New Note dialog can open inside it.
+#[tauri::command(async)]
+fn ensure_dir(path: String) -> Result<(), String> {
+    std::fs::create_dir_all(&path).map_err(|e| format!("{path}: {e}"))
+}
+
+/// Where New Note first offers to save: `Documents\DTE Advisory\Sessions\Notes`.
+/// After that the frontend remembers the last folder used.
+#[tauri::command]
+fn default_note_dir() -> String {
+    dirs::document_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("DTE Advisory")
+        .join("Sessions")
+        .join("Notes")
+        .to_string_lossy()
+        .into_owned()
+}
+
+/// Write a new note file with its starting text. Never over an existing file:
+/// a note's name is a minute stamp, and two in one minute must not collide.
+#[tauri::command(async)]
+fn create_note(path: String, text: String) -> Result<String, String> {
+    let path = PathBuf::from(&path);
+    if let Some(dir) = path.parent() {
+        std::fs::create_dir_all(dir).map_err(|e| format!("{}: {e}", dir.display()))?;
+    }
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&path)
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+    file.write_all(text.as_bytes())
+        .map_err(|e| format!("{}: {e}", path.display()))?;
+    Ok(path.to_string_lossy().into_owned())
+}
+
 /// The editor's live preview: the same render a saved file gets.
 #[tauri::command(async)]
 fn render_text(text: String) -> Result<String, String> {
@@ -1926,6 +1963,9 @@ fn main() {
             read_source,
             save_source,
             render_text,
+            ensure_dir,
+            default_note_dir,
+            create_note,
             json_region,
             load_asset,
             list_dir,

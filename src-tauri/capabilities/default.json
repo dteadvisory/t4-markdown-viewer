@@ -16,6 +16,7 @@
     "core:window:allow-destroy",
     "core:window:allow-maximize",
     "dialog:allow-open",
+    "dialog:allow-save",
     "opener:allow-open-url",
     "opener:allow-default-urls"
   ]
