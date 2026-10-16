@@ -620,6 +620,228 @@ function onShortcut(e) {
   }
 }
 
+/* ---------------- saved folders ---------------- */
+
+const shelf = {
+  list: document.getElementById("saved-list"),
+  none: document.getElementById("saved-none"),
+  add: document.getElementById("saved-add"),
+  star: document.getElementById("sidebar-save"),
+};
+
+/** The folders on the start screen. Seeded once with every project that keeps notes. */
+let savedFolders = readStore("savedFolders", null);
+
+async function loadSavedFolders() {
+  if (savedFolders === null) {
+    savedFolders = await invoke("default_saved_folders").catch(() => []);
+    writeStore("savedFolders", savedFolders);
+  }
+  renderSaved();
+  syncStar();
+}
+
+function isSaved(path) {
+  return !!path && (savedFolders ?? []).some((p) => samePath(p, path));
+}
+
+function setSaved(path, on) {
+  const rest = (savedFolders ?? []).filter((p) => !samePath(p, path));
+  savedFolders = on ? [...rest, path] : rest;
+  writeStore("savedFolders", savedFolders);
+  renderSaved();
+  syncStar();
+}
+
+function renderSaved() {
+  const list = savedFolders ?? [];
+  shelf.none.hidden = list.length > 0;
+  shelf.list.replaceChildren(
+    ...list.map((path) => {
+      const li = document.createElement("li");
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "saved-open";
+      open.dataset.path = path;
+      open.title = `Open ${path}`;
+      const name = document.createElement("span");
+      name.className = "saved-name";
+      name.textContent = baseName(path);
+      const where = document.createElement("span");
+      where.className = "saved-path";
+      where.textContent = dirName(path);
+      open.append(name, where);
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "saved-remove";
+      remove.dataset.path = path;
+      remove.title = `Remove ${baseName(path)} from Saved Folders`;
+      remove.setAttribute("aria-label", remove.title);
+      remove.textContent = "×";
+      li.append(open, remove);
+      return li;
+    }),
+  );
+}
+
+function syncStar() {
+  const on = isSaved(state.folder);
+  shelf.star.setAttribute("aria-pressed", String(on));
+  shelf.star.title = on ? "Remove this folder from the start screen" : "Save this folder to the start screen";
+}
+
+async function addSavedFolder() {
+  const path = await pickFolder();
+  if (path && !isSaved(path)) setSaved(path, true);
+}
+
+/* ---------------- search the whole folder ---------------- */
+
+const finder = {
+  box: document.getElementById("tree-hits"),
+  count: document.getElementById("tree-hits-count"),
+  list: document.getElementById("tree-hits-list"),
+  root: null,
+  query: "",
+  token: 0,
+  timer: 0,
+};
+
+/**
+ * The sidebar's search box looks through every file under the open folder,
+ * not just the rows already loaded. Two letters or more swaps the tree for a
+ * flat list of matches; clearing the box brings the tree back.
+ */
+function syncFinder() {
+  const root = state.folder;
+  const q = els.treeFilter.value.trim();
+  if (root === null || q.length < 2) {
+    finder.token++;
+    finder.root = null;
+    finder.query = "";
+    finder.box.hidden = true;
+    els.sidebar.classList.remove("searching");
+    return;
+  }
+  if (root === finder.root && q === finder.query) return;
+  finder.root = root;
+  finder.query = q;
+  clearTimeout(finder.timer);
+  const token = ++finder.token;
+  finder.timer = setTimeout(async () => {
+    let result;
+    try {
+      result = await invoke("find_files", { root, query: q });
+    } catch (err) {
+      result = { hits: [], more: false, error: String(err) };
+    }
+    if (token === finder.token) renderHits(result);
+  }, 150);
+}
+
+function renderHits({ hits, more, error }) {
+  const n = hits.length;
+  finder.count.textContent = error
+    ? `Couldn’t search: ${error}`
+    : n === 0
+      ? "No files match."
+      : more
+        ? `First ${n} matches. Keep typing to narrow them.`
+        : `${n} ${n === 1 ? "file" : "files"}`;
+  const current = activeTab()?.path;
+  finder.list.replaceChildren(
+    ...hits.map((hit) => {
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tree-hit";
+      btn.dataset.path = hit.path;
+      btn.title = hit.path;
+      if (current && samePath(current, hit.path)) btn.setAttribute("aria-current", "true");
+      const name = document.createElement("span");
+      name.className = "hit-name";
+      name.textContent = hit.name;
+      const dir = document.createElement("span");
+      dir.className = "hit-dir";
+      dir.textContent = hit.dir;
+      btn.append(name, dir);
+      li.append(btn);
+      return li;
+    }),
+  );
+  finder.box.hidden = false;
+  els.sidebar.classList.add("searching");
+}
+
+function hitButtons() {
+  return [...finder.list.querySelectorAll(".tree-hit")];
+}
+
+function wireFinder() {
+  els.treeFilter.addEventListener("input", syncFinder);
+  // Capture, so these run before app.js's own handler on the same box.
+  els.treeFilter.addEventListener(
+    "keydown",
+    (e) => {
+      if (e.key === "Escape") {
+        setTimeout(syncFinder); // app.js empties the box, without an input event
+        return;
+      }
+      if (finder.box.hidden || (e.key !== "Enter" && e.key !== "ArrowDown")) return;
+      const first = hitButtons()[0];
+      if (!first) return;
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (e.key === "Enter") loadPath(first.dataset.path).catch(toast);
+      else first.focus();
+    },
+    true,
+  );
+  finder.list.addEventListener("click", (e) => {
+    const btn = e.target.closest(".tree-hit");
+    if (!btn) return;
+    for (const b of hitButtons()) b.removeAttribute("aria-current");
+    btn.setAttribute("aria-current", "true");
+    loadPath(btn.dataset.path).catch(toast);
+  });
+  finder.list.addEventListener("keydown", (e) => {
+    const all = hitButtons();
+    const i = all.indexOf(document.activeElement);
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const next = i + (e.key === "ArrowDown" ? 1 : -1);
+      if (next < 0) els.treeFilter.focus();
+      else all[Math.min(next, all.length - 1)]?.focus();
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      els.treeFilter.focus();
+    }
+  });
+  // openFolder and closeFolder change the folder, and the box's text with it,
+  // without an input event: follow the sidebar instead.
+  const follow = new MutationObserver(() => {
+    syncFinder();
+    syncStar();
+  });
+  follow.observe(els.sidebar, { attributes: true, attributeFilter: ["hidden"] });
+  follow.observe(els.sidebarName, { attributes: true, attributeFilter: ["title"] });
+}
+
+function wireSaved() {
+  shelf.add.addEventListener("click", () => addSavedFolder().catch(toast));
+  shelf.star.addEventListener("click", () => {
+    if (state.folder !== null) setSaved(state.folder, !isSaved(state.folder));
+  });
+  shelf.list.addEventListener("click", (e) => {
+    const remove = e.target.closest(".saved-remove");
+    if (remove) return setSaved(remove.dataset.path, false);
+    const open = e.target.closest(".saved-open");
+    if (open) openFolder(open.dataset.path, { picked: true }).catch(toast);
+  });
+  loadSavedFolders().catch(console.error);
+}
+
 function notesMain() {
   document.addEventListener("keydown", onShortcut, true);
 
@@ -693,6 +915,9 @@ function notesMain() {
   document.addEventListener("mousedown", (e) => e.target !== t4.notePop && hidePop());
   window.addEventListener("scroll", hidePop, { passive: true });
   document.addEventListener("keyup", (e) => e.shiftKey && setTimeout(placePop));
+
+  wireFinder();
+  wireSaved();
 
   if (readStore("panel", null)) showNotes(true);
   notesAfterChrome();

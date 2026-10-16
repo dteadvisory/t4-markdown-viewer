@@ -100,6 +100,9 @@
             <svg aria-hidden="true"><use href="#icon-folder" /></svg>
             <span id="sidebar-name-text"></span>
           </button>
+          <button id="sidebar-save" class="nav" type="button" title="Save this folder to the start screen" aria-label="Save this folder" aria-pressed="false">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.75 L9.9 5.6 L14.1 6.2 L11.05 9.15 L11.8 13.35 L8 11.35 L4.2 13.35 L4.95 9.15 L1.9 6.2 L6.1 5.6 Z" /></svg>
+          </button>
           <button id="sidebar-sort" class="nav" type="button" title="Sort" aria-label="Sort" aria-haspopup="menu" aria-expanded="false">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 4 H13 M3 8 H9.5 M3 12 H6" /></svg>
           </button>
@@ -107,7 +110,11 @@
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4 L12 12 M12 4 L4 12" /></svg>
           </button>
         </div>
-        <input id="tree-filter" type="search" placeholder="Filter files" aria-label="Filter files" />
+        <input id="tree-filter" type="search" placeholder="Search this folder" aria-label="Search every file in this folder" />
+        <div id="tree-hits" hidden>
+          <p id="tree-hits-count" role="status"></p>
+          <ul id="tree-hits-list"></ul>
+        </div>
         <ul id="tree" role="tree"></ul>
       </aside>
       <!-- Outside the sidebar: inside it, the grip would scroll away with the tree. -->
@@ -162,6 +169,15 @@
              Unhidden only when a session is waiting and Settings says to ask.
              Its label counts what is in the session, so the frontend writes it. -->
         <button id="empty-reopen-btn" type="button" hidden><svg aria-hidden="true"><use href="#icon-file" /></svg><span id="empty-reopen-label"></span></button>
+        <!-- T4 Notes: the projects opened most, one click away. -->
+        <div id="saved">
+          <div id="saved-head">
+            <h2>Saved Folders</h2>
+            <button id="saved-add" type="button" class="minor">Add Folder…</button>
+          </div>
+          <ul id="saved-list"></ul>
+          <p id="saved-none" hidden>No saved folders yet. Add one here, or click the star beside a folder's name in the sidebar.</p>
+        </div>
       </section>
 
       <section id="error" hidden>

@@ -865,6 +865,111 @@ fn default_note_dir() -> String {
         .into_owned()
 }
 
+/// The folders the start screen offers before the reader has saved any: every
+/// project in Documents that keeps notes for Claude (`Sessions\Notes`).
+#[tauri::command(async)]
+fn default_saved_folders() -> Vec<String> {
+    let Some(docs) = dirs::document_dir() else { return Vec::new() };
+    let Ok(read) = std::fs::read_dir(&docs) else { return Vec::new() };
+    let mut found: Vec<String> = read
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.join("Sessions").join("Notes").is_dir())
+        .map(|p| strip_unc(&p))
+        .collect();
+    found.sort_by(|a, b| natural_cmp(a, b));
+    found
+}
+
+#[derive(Serialize)]
+struct FoundFile {
+    name: String,
+    path: String,
+    /// The folder it sits in, relative to the root searched; "" at the top.
+    dir: String,
+}
+
+#[derive(Serialize)]
+struct FindResult {
+    hits: Vec<FoundFile>,
+    /// More matched than were returned.
+    more: bool,
+}
+
+/// Folders a search never walks into: build output and installed packages
+/// hold thousands of files nobody is looking for.
+const FIND_SKIP: &[&str] = &["node_modules", "target", "dist", "build", "__pycache__", "venv"];
+
+/// Every openable file under `root` whose path, relative to `root`, holds all
+/// the words in `query` (any order, any case). Hidden folders are skipped, as
+/// in the sidebar, and folder links are not followed, so a loop cannot trap it.
+/// Files whose own name matches come first, then the shallower ones.
+#[tauri::command(async)]
+fn find_files(root: String, query: String) -> Result<FindResult, String> {
+    const LIMIT: usize = 200;
+    const MAX_VISITS: usize = 200_000;
+    let base = PathBuf::from(&root);
+    if !base.is_dir() {
+        return Err(format!("Not a folder: {root}"));
+    }
+    let words: Vec<String> = query.to_lowercase().split_whitespace().map(String::from).collect();
+    if words.is_empty() {
+        return Ok(FindResult { hits: Vec::new(), more: false });
+    }
+    let mut hits: Vec<(bool, usize, FoundFile)> = Vec::new();
+    let mut stack = vec![base.clone()];
+    let mut visits = 0;
+    while let Some(dir) = stack.pop() {
+        let Ok(read) = std::fs::read_dir(&dir) else { continue };
+        for entry in read.flatten() {
+            visits += 1;
+            if visits > MAX_VISITS {
+                stack.clear();
+                break;
+            }
+            let path = entry.path();
+            if !is_visible_entry(&path) {
+                continue;
+            }
+            let Ok(kind) = entry.file_type() else { continue };
+            if kind.is_dir() {
+                let name = entry.file_name().to_string_lossy().to_lowercase();
+                if !FIND_SKIP.contains(&name.as_str()) {
+                    stack.push(path);
+                }
+                continue;
+            }
+            if !is_document(&path) && !is_image(&path) {
+                continue;
+            }
+            let rel = path.strip_prefix(&base).unwrap_or(&path).to_string_lossy().into_owned();
+            let rel_lower = rel.to_lowercase();
+            if !words.iter().all(|w| rel_lower.contains(w.as_str())) {
+                continue;
+            }
+            let name = entry.file_name().to_string_lossy().into_owned();
+            let name_lower = name.to_lowercase();
+            let in_name = words.iter().all(|w| name_lower.contains(w.as_str()));
+            let dir = path
+                .parent()
+                .and_then(|p| p.strip_prefix(&base).ok())
+                .map(|p| p.to_string_lossy().into_owned())
+                .unwrap_or_default();
+            let depth = rel.matches(['\\', '/']).count();
+            hits.push((in_name, depth, FoundFile { name, path: strip_unc(&path), dir }));
+        }
+    }
+    hits.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then(a.1.cmp(&b.1))
+            .then_with(|| natural_cmp(&a.2.dir, &b.2.dir))
+            .then_with(|| natural_cmp(&a.2.name, &b.2.name))
+    });
+    let more = hits.len() > LIMIT;
+    hits.truncate(LIMIT);
+    Ok(FindResult { hits: hits.into_iter().map(|h| h.2).collect(), more })
+}
+
 /// Write a new note file with its starting text. Never over an existing file:
 /// a note's name is a minute stamp, and two in one minute must not collide.
 #[tauri::command(async)]
@@ -1966,6 +2071,8 @@ fn main() {
             ensure_dir,
             default_note_dir,
             create_note,
+            default_saved_folders,
+            find_files,
             json_region,
             load_asset,
             list_dir,

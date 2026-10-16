@@ -321,3 +321,199 @@
   justify-content: flex-end;
   gap: 0.5rem;
 }
+
+/* ---------- saved folders on the start screen ---------- */
+
+#saved {
+  margin-top: 2.5rem;
+  max-width: 34rem;
+}
+
+#saved-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+#saved-head h2 {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+}
+
+#saved-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ui-border);
+  border-radius: 4px;
+}
+
+#saved-list:empty {
+  display: none;
+}
+
+#saved-list li {
+  display: flex;
+  align-items: stretch;
+}
+
+#saved-list li + li {
+  border-top: 1px solid var(--ui-border);
+}
+
+#empty #saved button {
+  background: transparent;
+  color: var(--ui-fg);
+  border-color: transparent;
+  border-radius: 3px;
+}
+
+#empty #saved #saved-add {
+  border-color: var(--ui-border);
+  padding: 0.25rem 0.75rem;
+}
+
+#empty #saved button:hover,
+#empty #saved #saved-add:hover {
+  border-color: var(--ui-accent);
+}
+
+#empty #saved button:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: -2px;
+}
+
+#empty #saved .saved-open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+
+.saved-name {
+  font-weight: 600;
+}
+
+.saved-path {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+  color: var(--ui-fg-muted);
+}
+
+#empty #saved .saved-remove {
+  flex: none;
+  padding: 0 0.875rem;
+  font-size: 1.125rem;
+  color: var(--ui-fg-muted);
+}
+
+#saved-none {
+  color: var(--ui-fg-muted);
+}
+
+/* ---------- star and search in the sidebar ---------- */
+
+#sidebar-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.1875rem;
+}
+
+#sidebar-save:hover {
+  border-color: var(--ui-accent);
+}
+
+#sidebar-save svg {
+  display: block;
+  width: 0.875rem;
+  height: 0.875rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+}
+
+#sidebar-save[aria-pressed="true"] {
+  color: var(--ui-accent);
+}
+
+#sidebar-save[aria-pressed="true"] svg {
+  fill: currentColor;
+}
+
+#sidebar.searching #tree {
+  display: none;
+}
+
+#tree-hits[hidden] {
+  display: none;
+}
+
+#tree-hits-count {
+  margin: 0.375rem 0.75rem 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--ui-fg-muted);
+}
+
+#tree-hits-list {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.5rem;
+}
+
+#sidebar .tree-hit {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: 0.25rem 0.75rem;
+  text-align: left;
+  border-radius: 0;
+}
+
+#sidebar .tree-hit:hover {
+  box-shadow: inset 0 0 0 1px var(--ui-accent);
+}
+
+#sidebar .tree-hit:focus-visible {
+  outline-offset: -2px;
+}
+
+#sidebar .tree-hit[aria-current="true"] .hit-name {
+  color: var(--ui-accent-text);
+  font-weight: 600;
+}
+
+.hit-name,
+.hit-dir {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hit-dir {
+  font-size: 0.75rem;
+  color: var(--ui-fg-muted);
+}
+
+.hit-dir:empty {
+  display: none;
+}
+
+/* Under the Reopen offer, and only where the open buttons are: a folder on
+   show means the way in is the sidebar. */
+#sidebar:not([hidden]) ~ main #saved {
+  display: none;
+}
