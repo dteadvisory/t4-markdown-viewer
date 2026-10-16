@@ -66,6 +66,8 @@ const els = {
   content: document.getElementById("content"),
   empty: document.getElementById("empty"),
   image: document.getElementById("image"),
+  page: document.getElementById("page"),
+  pageFrame: document.getElementById("page-frame"),
   imageView: document.getElementById("image-view"),
   imageEl: document.getElementById("image-el"),
   imageTools: document.getElementById("image-tools"),
@@ -137,6 +139,8 @@ const JSON_EXTS = ["json", "jsonc"];
 const DOC_LINK = new RegExp(`\\.(${[...MD_EXTS, ...JSON_EXTS].join("|")})$`, "i");
 const JSON_DOC = new RegExp(`\\.(${JSON_EXTS.join("|")})$`, "i");
 const IMG_LINK = /\.(svg|png|jpe?g|gif|webp|avif|bmp|ico)$/i;
+/** T4 Notes: a page shown as itself in a frame, scripts and all. Mirrors `is_page`. */
+const PAGE_LINK = /\.html?$/i;
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
 /**
@@ -161,6 +165,10 @@ const ABSOLUTE_PATH = /^[a-z]:[\\/]/i;
  */
 function isImage(p) {
   return IMG_LINK.test(p);
+}
+
+function isPage(p) {
+  return PAGE_LINK.test(p);
 }
 
 /* ---------------- paths ---------------- */
@@ -1492,6 +1500,7 @@ function show(which) {
   els.content.hidden = which !== "content";
   els.empty.hidden = which !== "empty";
   els.image.hidden = which !== "image";
+  els.page.hidden = which !== "page";
   els.error.hidden = which !== "error";
   // Opening anything writes this window's session over the one on offer, so
   // the offer is stale from then on and must not come back with the empty
@@ -1500,6 +1509,12 @@ function show(which) {
   // The image panel brings its own scroll box. Left to itself the body would
   // scroll too, giving two scrollbars for one thing to scroll.
   document.documentElement.classList.toggle("image-mode", which === "image");
+  document.documentElement.classList.toggle("page-mode", which === "page");
+  // A page left behind keeps playing its audio unless it is unloaded.
+  if (which !== "page" && els.pageFrame.dataset.url) {
+    els.pageFrame.dataset.url = "";
+    els.pageFrame.src = "about:blank";
+  }
   // Anything else on screen means there is no picture to zoom, and every
   // handler that reads `picture` checks it first.
   if (which !== "image") picture = null;
@@ -1993,7 +2008,36 @@ async function showActive(scrollY) {
   // Whether the page being left has been replaced yet.
   let swapped = false;
   try {
-    if (isImage(entry.path)) {
+    if (isPage(entry.path)) {
+      // T4 Notes: a briefing or call guide runs as itself, loaded over the
+      // asset protocol so its audio and relative files resolve beside it.
+      // Its ticks and notes live in the page's own storage, so a reload loses
+      // nothing; it reloads only when the file or the tab changes.
+      const asset = await invoke("load_asset", { path: entry.path });
+      if (token !== renderToken) return;
+      entry.path = asset.path;
+      tab.path = asset.path;
+      tab.dir = asset.dir;
+      tab.label = baseName(asset.path);
+      tab.heading = "";
+      tab.media = [];
+      rememberScroll();
+      shownEntry = entry;
+      swapped = true;
+      show("page");
+      // Slashes kept as slashes, unlike `convertFileSrc`, which escapes the
+      // whole path into one segment: the page's own relative links (its audio
+      // folder, say) have to resolve against its folder.
+      const v = assetVersions.get(normPath(asset.path));
+      const url =
+        "http://asset.localhost/" +
+        asset.path.split(/[\\/]/).map(encodeURIComponent).join("/").replace(/^([A-Za-z])%3A/, "$1:") +
+        (v ? `?v=${v}` : "");
+      if (els.pageFrame.dataset.url !== url) {
+        els.pageFrame.dataset.url = url;
+        els.pageFrame.src = url;
+      }
+    } else if (isImage(entry.path)) {
       // No content to fetch: the webview loads the bytes itself over the asset
       // protocol. What this call is for is the permission to do so.
       const asset = await invoke("load_asset", { path: entry.path });
@@ -4403,6 +4447,7 @@ async function pickFile() {
       { name: "Markdown", extensions: MD_EXTS },
       { name: "JSON", extensions: JSON_EXTS },
       { name: "Images", extensions: ["svg", "png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "ico"] },
+      { name: "Pages (briefings, call guides)", extensions: ["html", "htm"] },
       { name: "All files", extensions: ["*"] },
     ],
   });
@@ -4546,7 +4591,7 @@ function onLinkClick(event) {
       // in it to land. Dropping the fragment would open every cross-file
       // reference at the top of its document.
       loadPath(target, rest.join("#"));
-    } else if (isImage(pathPart)) {
+    } else if (isImage(pathPart) || isPage(pathPart)) {
       // A new tab, not this one: the document that linked the diagram is the
       // thing you were reading, and closing the tab is how you get back to it.
       openTab(target).catch(console.error);
@@ -5493,7 +5538,7 @@ async function main() {
     // A picture the webview has fetched once is served from its cache the next
     // time too, so every changed image needs a new version whether or not a tab
     // showing it is the one on screen — the background tab reads it on the way in.
-    for (const p of changed) if (isImage(p)) bumpAsset(p);
+    for (const p of changed) if (isImage(p) || isPage(p)) bumpAsset(p);
     // A picture embedded in the document on screen: swap that one `<img>` rather
     // than re-rendering the page around it, which would cost the reading position.
     if (!els.content.hidden) {

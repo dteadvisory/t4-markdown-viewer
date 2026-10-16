@@ -517,3 +517,25 @@
 #sidebar:not([hidden]) ~ main #saved {
   display: none;
 }
+
+/* ---------- pages (briefings, call guides) ---------- */
+
+html.page-mode {
+  overflow: hidden; /* the page scrolls inside its frame */
+}
+
+#page {
+  height: calc(100dvh - var(--bar-h, 0px));
+}
+
+#page[hidden] {
+  display: none;
+}
+
+#page-frame {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}

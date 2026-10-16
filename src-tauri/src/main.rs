@@ -35,6 +35,8 @@ const IMG_EXTS: &[&str] = &[
 /// Shown as highlighted source rather than rendered — see `json.rs`. The
 /// installers register these for Open With, never as the default handler.
 const JSON_EXTS: &[&str] = &["json", "jsonc"];
+/// T4 Notes: self-contained pages (briefings, call guides), shown whole in a frame.
+const PAGE_EXTS: &[&str] = &["html", "htm"];
 
 /// How big a JSON document `load_file` will read — see `json.rs`, which shows
 /// it a chunk at a time. Images are deliberately not capped: `load_asset`
@@ -245,6 +247,11 @@ fn is_document(path: &Path) -> bool {
     is_markdown(path) || is_json(path)
 }
 
+/// Mirrors `PAGE_LINK` in app.js: a page shown as itself, scripts and all.
+fn is_page(path: &Path) -> bool {
+    has_ext(path, PAGE_EXTS)
+}
+
 /// Mirrors `IMG_LINK` in app.js: what the viewer can show in a tab of its own.
 fn is_image(path: &Path) -> bool {
     has_ext(path, IMG_EXTS)
@@ -265,7 +272,7 @@ fn file_from_args<S: AsRef<str>>(args: &[S]) -> Option<PathBuf> {
     args.iter()
         .skip(1)
         .map(|a| PathBuf::from(a.as_ref()))
-        .find(|p| p.is_file() && is_document(p))
+        .find(|p| p.is_file() && (is_document(p) || is_page(p)))
 }
 
 /// `canonicalize` on Windows returns `\\?\C:\...`; the asset protocol and the
@@ -939,7 +946,7 @@ fn find_files(root: String, query: String) -> Result<FindResult, String> {
                 }
                 continue;
             }
-            if !is_document(&path) && !is_image(&path) {
+            if !is_document(&path) && !is_image(&path) && !is_page(&path) {
                 continue;
             }
             let rel = path.strip_prefix(&base).unwrap_or(&path).to_string_lossy().into_owned();
@@ -1172,7 +1179,7 @@ fn list_dir(path: String, sort: String) -> Result<Listing, String> {
             // link's own mtime never moves, so it would never reach the top.
             let meta = std::fs::metadata(&path).ok();
             let is_dir = meta.as_ref().is_some_and(|m| m.is_dir());
-            if !is_dir && !is_document(&path) && !is_image(&path) {
+            if !is_dir && !is_document(&path) && !is_image(&path) && !is_page(&path) {
                 return None;
             }
             Some(DirEntry {
@@ -2265,7 +2272,7 @@ fn main() {
             #[cfg(target_os = "macos")]
             if let tauri::RunEvent::Opened { urls } = &_event {
                 for path in urls.iter().filter_map(|u| u.to_file_path().ok()) {
-                    if path.is_file() && is_document(&path) {
+                    if path.is_file() && (is_document(&path) || is_page(&path)) {
                         open_path(_app, &path);
                     }
                 }
