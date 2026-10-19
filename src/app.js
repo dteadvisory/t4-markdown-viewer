@@ -139,8 +139,11 @@ const JSON_EXTS = ["json", "jsonc"];
 const DOC_LINK = new RegExp(`\\.(${[...MD_EXTS, ...JSON_EXTS].join("|")})$`, "i");
 const JSON_DOC = new RegExp(`\\.(${JSON_EXTS.join("|")})$`, "i");
 const IMG_LINK = /\.(svg|png|jpe?g|gif|webp|avif|bmp|ico)$/i;
-/** T4 Notes: a page shown as itself in a frame, scripts and all. Mirrors `is_page`. */
-const PAGE_LINK = /\.html?$/i;
+/**
+ * T4 Notes: a page shown as itself in a frame, scripts and all. Mirrors `is_page`.
+ * A PDF goes the same way: WebView2 draws it with its built-in PDF viewer.
+ */
+const PAGE_LINK = /\.(html?|pdf)$/i;
 const HAS_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 
 /**
@@ -4448,6 +4451,7 @@ async function pickFile() {
       { name: "JSON", extensions: JSON_EXTS },
       { name: "Images", extensions: ["svg", "png", "jpg", "jpeg", "gif", "webp", "avif", "bmp", "ico"] },
       { name: "Pages (briefings, call guides)", extensions: ["html", "htm"] },
+      { name: "PDF", extensions: ["pdf"] },
       { name: "All files", extensions: ["*"] },
     ],
   });

@@ -20,6 +20,7 @@
 ; document.
 !define T4_PROGID "T4Notes.Document"
 !define T4_JSON_PROGID "T4Notes.Json"
+!define T4_PDF_PROGID "T4Notes.Pdf"
 !define T4_CAPKEY "Software\T4Notes\Capabilities"
 
 ; SHCNE_ASSOCCHANGED — tell Explorer to re-read associations so the change
@@ -54,6 +55,7 @@
   ; Friendly type names so Explorer's Type column reads well.
   WriteRegStr SHELL_CONTEXT "Software\Classes\${T4_PROGID}" "FriendlyTypeName" "Markdown Document"
   WriteRegStr SHELL_CONTEXT "Software\Classes\${T4_JSON_PROGID}" "FriendlyTypeName" "JSON Document"
+  WriteRegStr SHELL_CONTEXT "Software\Classes\${T4_PDF_PROGID}" "FriendlyTypeName" "PDF Document"
 
   ; --- Per-extension registration. Keep each extension and the ProgID it is
   ; registered under in sync with bundle.fileAssociations in tauri.conf.json. ---
@@ -64,6 +66,7 @@
   !insertmacro T4_REGISTER_EXT "mdtext" "${T4_PROGID}"
   !insertmacro T4_REGISTER_EXT "json" "${T4_JSON_PROGID}"
   !insertmacro T4_REGISTER_EXT "jsonc" "${T4_JSON_PROGID}"
+  !insertmacro T4_REGISTER_EXT "pdf" "${T4_PDF_PROGID}"
 
   ; --- Capabilities: required to appear in Settings > Default apps. ---
   WriteRegStr SHELL_CONTEXT "${T4_CAPKEY}" "ApplicationName" "${PRODUCTNAME}"
@@ -82,6 +85,7 @@
   !insertmacro T4_UNREGISTER_EXT "mdtext" "${T4_PROGID}"
   !insertmacro T4_UNREGISTER_EXT "json" "${T4_JSON_PROGID}"
   !insertmacro T4_UNREGISTER_EXT "jsonc" "${T4_JSON_PROGID}"
+  !insertmacro T4_UNREGISTER_EXT "pdf" "${T4_PDF_PROGID}"
 
   DeleteRegKey SHELL_CONTEXT "Software\Classes\Applications\${MAINBINARYNAME}.exe"
   DeleteRegValue SHELL_CONTEXT "Software\RegisteredApplications" "${PRODUCTNAME}"

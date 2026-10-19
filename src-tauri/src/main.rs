@@ -36,7 +36,8 @@ const IMG_EXTS: &[&str] = &[
 /// installers register these for Open With, never as the default handler.
 const JSON_EXTS: &[&str] = &["json", "jsonc"];
 /// T4 Notes: self-contained pages (briefings, call guides), shown whole in a frame.
-const PAGE_EXTS: &[&str] = &["html", "htm"];
+/// A PDF goes the same way: WebView2 draws it with its built-in PDF viewer.
+const PAGE_EXTS: &[&str] = &["html", "htm", "pdf"];
 
 /// How big a JSON document `load_file` will read — see `json.rs`, which shows
 /// it a chunk at a time. Images are deliberately not capped: `load_asset`

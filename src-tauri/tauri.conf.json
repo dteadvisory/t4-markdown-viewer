@@ -68,6 +68,13 @@
         "description": "JSON Document",
         "role": "Viewer",
         "mimeType": "application/json"
+      },
+      {
+        "ext": ["pdf"],
+        "name": "T4Notes.Pdf",
+        "description": "PDF Document",
+        "role": "Viewer",
+        "mimeType": "application/pdf"
       }
     ],
     "windows": {
