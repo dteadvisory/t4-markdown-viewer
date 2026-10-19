@@ -2,7 +2,7 @@
 
 **Goal:** open `.pdf` files in T4 Notes, so it can be the Windows default for PDFs and Adobe Acrobat can be uninstalled.
 
-**Approach:** reuse the HTML page tab (commit e7d702f). A PDF loads over the asset protocol into the same `#page-frame` iframe, and WebView2 draws it with the Edge PDF viewer built into it: zoom, page thumbnails, find, print, save a copy, highlight, draw, text notes and form filling. No PDF library is bundled.
+**Approach:** reuse the HTML page tab (commit e7d702f). A PDF loads over the asset protocol into the same `#page-frame` iframe, and WebView2 draws it with the Edge PDF viewer built into it: zoom, page jump, contents, rotate, two-page view, find, print and save a copy. Tested 2026-10-19: no highlight or draw tools show in WebView2's viewer. No PDF library is bundled.
 
 ## Changes
 
