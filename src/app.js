@@ -174,6 +174,45 @@ function isPage(p) {
   return PAGE_LINK.test(p);
 }
 
+function isPdf(p) {
+  return /\.pdf$/i.test(p);
+}
+
+/**
+ * T4 Notes: one frame per PDF tab, so a PDF keeps its page while another tab
+ * is on screen. HTML pages share `#page-frame` and are unloaded when left, so
+ * their audio stops; a PDF has nothing playing, so it is kept.
+ */
+const pdfFrames = new Map();
+
+function pdfFrameFor(tab) {
+  let frame = pdfFrames.get(tab.id);
+  if (!frame) {
+    frame = document.createElement("iframe");
+    frame.title = "PDF";
+    frame.className = "pdf-frame";
+    els.page.appendChild(frame);
+    pdfFrames.set(tab.id, frame);
+  }
+  frame.dataset.path = normPath(tab.path);
+  return frame;
+}
+
+/** The one frame in `#page` that is on screen; the rest stay loaded, unseen. */
+function showFrame(frame) {
+  for (const f of els.page.querySelectorAll("iframe")) f.classList.toggle("off", f !== frame);
+}
+
+/** Drop the frames of PDF tabs that closed, moved to another window, or now show another file. */
+function prunePdfFrames() {
+  for (const [id, frame] of pdfFrames) {
+    const tab = tabs.find((t) => t.id === id);
+    if (tab && normPath(tab.path) === frame.dataset.path) continue;
+    frame.remove();
+    pdfFrames.delete(id);
+  }
+}
+
 /* ---------------- paths ---------------- */
 
 /** `href` with its percent-escapes undone; malformed ones are used as written. */
@@ -2036,9 +2075,16 @@ async function showActive(scrollY) {
         "http://asset.localhost/" +
         asset.path.split(/[\\/]/).map(encodeURIComponent).join("/").replace(/^([A-Za-z])%3A/, "$1:") +
         (v ? `?v=${v}` : "");
-      if (els.pageFrame.dataset.url !== url) {
-        els.pageFrame.dataset.url = url;
-        els.pageFrame.src = url;
+      const frame = isPdf(asset.path) ? pdfFrameFor(tab) : els.pageFrame;
+      // A briefing left for a PDF is unloaded, as it is when any other tab shows.
+      if (frame !== els.pageFrame && els.pageFrame.dataset.url) {
+        els.pageFrame.dataset.url = "";
+        els.pageFrame.src = "about:blank";
+      }
+      showFrame(frame);
+      if (frame.dataset.url !== url) {
+        frame.dataset.url = url;
+        frame.src = url;
       }
     } else if (isImage(entry.path)) {
       // No content to fetch: the webview loads the bytes itself over the asset
@@ -2157,7 +2203,34 @@ function measureBar() {
 /** Slot the drop caret sits in, or -1 when no drag is hovering this window. */
 let dropCaret = -1;
 
+/**
+ * T4 Notes: for tabs sharing a file name, the nearest parent folder where their
+ * paths differ, so two "Website Proposal.pdf" tabs read "Karen Harmsen" and
+ * "Byron And Beyond Networking". Unique names get no hint.
+ */
+function tabHints() {
+  const groups = new Map();
+  for (const t of tabs) {
+    const k = t.label.toLowerCase();
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(t);
+  }
+  const hints = new Map();
+  for (const group of groups.values()) {
+    if (group.length < 2) continue;
+    const dirs = group.map((t) => t.path.split(/[\\/]/).slice(0, -1).reverse());
+    group.forEach((t, i) => {
+      const same = (d) => dirs.every((x) => x[d]?.toLowerCase() === dirs[i][d]?.toLowerCase());
+      let d = 0;
+      while (d < dirs[i].length && same(d)) d++;
+      if (dirs[i][d]) hints.set(t.id, dirs[i][d]);
+    });
+  }
+  return hints;
+}
+
 function renderTabs() {
+  prunePdfFrames();
   const visible = tabs.length > 1 || dropCaret >= 0;
   els.tabs.hidden = !visible;
   if (!visible) {
@@ -2167,6 +2240,7 @@ function renderTabs() {
   }
 
   const nodes = [];
+  const hints = tabHints();
   tabs.forEach((t, i) => {
     if (i === dropCaret) nodes.push(caretElement());
     const el = document.createElement("div");
@@ -2189,7 +2263,16 @@ function renderTabs() {
     close.setAttribute("aria-label", `Close ${t.label}`);
     close.textContent = "×";
 
-    el.append(label, close);
+    const hint = hints.get(t.id);
+    if (hint) {
+      const h = document.createElement("span");
+      h.className = "tab-hint";
+      h.textContent = hint;
+      el.classList.add("has-hint");
+      el.append(label, h, close);
+    } else {
+      el.append(label, close);
+    }
     nodes.push(el);
   });
   if (dropCaret >= tabs.length) nodes.push(caretElement());
