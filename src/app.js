@@ -4696,6 +4696,32 @@ function onLinkClick(event) {
 }
 
 /**
+ * T4 Notes: a link clicked inside an HTML page tab, sent up by `page_links.js`.
+ * Websites, mail and phone links go to the default browser; a file on this
+ * machine opens in a new tab, so the page stays where it was.
+ */
+function onPageLink(event) {
+  const href = event.data?.t4Link;
+  if (typeof href !== "string" || event.origin !== "http://asset.localhost") return;
+  const frames = [els.pageFrame, ...pdfFrames.values()];
+  if (!frames.some((f) => f.contentWindow === event.source)) return;
+  let url;
+  try {
+    url = new URL(href);
+  } catch {
+    return;
+  }
+  if (url.host !== "asset.localhost") {
+    if (/^(https?|mailto|tel):$/.test(url.protocol)) openUrl(url.href).catch(toast);
+    return;
+  }
+  const target = unescapeHref(url.pathname.slice(1));
+  if (!ABSOLUTE_PATH.test(target)) return;
+  if (DOC_LINK.test(target) || isImage(target) || isPage(target)) openTab(target).catch(console.error);
+  else invoke("reveal_path", { path: target }).catch(toast);
+}
+
+/**
  * Ticks go one at a time, each against the stamp the last one left: two quick
  * ones must not both claim the render's. A tick the file has moved on from is
  * refused; the page then shows the file as it is — on a share that sends no
@@ -5457,6 +5483,7 @@ async function main() {
   els.themeToggle.addEventListener("click", toggleThemeMode);
   els.content.addEventListener("click", onCopySection);
   els.content.addEventListener("click", onLinkClick);
+  addEventListener("message", onPageLink);
   // A press that never becomes a click on the page — a right or middle
   // button, or one dragged out of it — focuses a diagram or picture too, and
   // any key after makes that a keyboard focus. Let go of it once the press

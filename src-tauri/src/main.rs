@@ -2065,6 +2065,8 @@ fn main() {
         .plugin(
             tauri::plugin::Builder::<tauri::Wry>::new("stay")
                 .on_navigation(stay)
+                // T4 Notes: links inside an HTML page tab are handed to the app.
+                .js_init_script_on_all_frames(include_str!("page_links.js"))
                 .build(),
         )
         .manage(AppState::default())
