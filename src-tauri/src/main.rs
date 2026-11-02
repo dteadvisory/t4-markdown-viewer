@@ -996,6 +996,35 @@ fn create_note(path: String, text: String) -> Result<String, String> {
     Ok(path.to_string_lossy().into_owned())
 }
 
+/// T4 Notes: append one decision from a decision page to `decisions.jsonl`
+/// beside it. Only a page named `*.desk.html` that exists on disk may write,
+/// only to that one file, and only a single line of valid JSON under 64 KB.
+#[tauri::command(async)]
+fn append_desk_line(page: String, line: String) -> Result<(), String> {
+    let page = PathBuf::from(&page);
+    let name = page
+        .file_name()
+        .map(|n| n.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
+    if !name.ends_with(".desk.html") || !page.is_file() {
+        return Err("Only a .desk.html page can save decisions.".into());
+    }
+    if line.len() > 65_536 || line.contains('\n') || line.contains('\r') {
+        return Err("A decision must be one line under 64 KB.".into());
+    }
+    serde_json::from_str::<Value>(&line).map_err(|e| format!("Not valid JSON: {e}"))?;
+    let dir = page.parent().ok_or("The page has no folder.")?;
+    let target = dir.join("decisions.jsonl");
+    let mut file = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&target)
+        .map_err(|e| format!("{}: {e}", target.display()))?;
+    file.write_all(format!("{line}\n").as_bytes())
+        .map_err(|e| format!("{}: {e}", target.display()))?;
+    Ok(())
+}
+
 /// The editor's live preview: the same render a saved file gets.
 #[tauri::command(async)]
 fn render_text(text: String) -> Result<String, String> {
@@ -2081,6 +2110,7 @@ fn main() {
             ensure_dir,
             default_note_dir,
             create_note,
+            append_desk_line,
             default_saved_folders,
             find_files,
             json_region,

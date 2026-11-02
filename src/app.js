@@ -4722,6 +4722,35 @@ function onPageLink(event) {
 }
 
 /**
+ * T4 Notes: a decision page (a `.desk.html` file) hands each decision up as one
+ * JSON line, and the app appends it to `decisions.jsonl` beside the page, where
+ * Claude is watching. Only the page in the page frame is heard, and the backend
+ * refuses any page whose name doesn't end in `.desk.html`, so an ordinary page
+ * still can't write anything.
+ */
+let deskWriting = Promise.resolve();
+
+function onDeskLine(event) {
+  const data = event.data?.t4Desk;
+  if (!data || typeof data.line !== "string" || event.origin !== "http://asset.localhost") return;
+  if (els.pageFrame.contentWindow !== event.source) return;
+  const url = els.pageFrame.dataset.url || "";
+  if (!url.startsWith("http://asset.localhost/")) return;
+  const page = unescapeHref(url.slice("http://asset.localhost/".length).replace(/\?.*$/, ""));
+  const source = event.source;
+  const reply = (ok, error) => source?.postMessage({ t4DeskAck: { id: data.id, ok, error } }, "http://asset.localhost");
+  deskWriting = deskWriting.then(() =>
+    invoke("append_desk_line", { page, line: data.line }).then(
+      () => reply(true),
+      (err) => {
+        reply(false, String(err));
+        toast(err);
+      },
+    ),
+  );
+}
+
+/**
  * Ticks go one at a time, each against the stamp the last one left: two quick
  * ones must not both claim the render's. A tick the file has moved on from is
  * refused; the page then shows the file as it is — on a share that sends no
@@ -5484,6 +5513,7 @@ async function main() {
   els.content.addEventListener("click", onCopySection);
   els.content.addEventListener("click", onLinkClick);
   addEventListener("message", onPageLink);
+  addEventListener("message", onDeskLine);
   // A press that never becomes a click on the page — a right or middle
   // button, or one dragged out of it — focuses a diagram or picture too, and
   // any key after makes that a keyboard focus. Let go of it once the press
